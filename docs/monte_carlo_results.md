@@ -107,14 +107,21 @@ does more). The difference between them is the **margin**.
 
 ## 3. Verdicts — how often does each outcome occur?
 
-Share of the 1,000 runs ending in each state at year 5:
+**Direction at year 5** — mutually exclusive, sums to 100%:
 
-| Outcome at year 5 | Share of runs |
+| Direction | Share of runs |
 |---|---|
-| Final employment **> baseline (1.0×)** — net job growth | **66.4%** |
-| Final employment **> 1.1×** — clear expansion | 53.2% |
-| Final employment **< 0.9×** — clear contraction | 20.9% |
-| Final employment **< 0.7×** — severe contraction | 7.4% |
+| More engineers than today (>1.0×) | **66.4%** |
+| Fewer engineers than today (<1.0×) | 33.6% |
+
+**Severity bands** — cumulative tails *nested within* the rows above, so they do **not**
+add to 100% (each is a subset, and the 0.9×–1.1× middle band — 25.9% — isn't shown):
+
+| Band | Share of runs |
+|---|---|
+| Clear expansion (>1.1×) | 53.2% |
+| Clear contraction (<0.9×) | 20.9% |
+| Severe contraction (<0.7×) | 7.4% |
 
 ### What this says
 Over a 5-year window the balance **tilts clearly toward growth**: about **two-thirds of

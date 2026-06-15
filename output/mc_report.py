@@ -138,6 +138,7 @@ def write_market_mc_report(results, n_years, n_iterations, seed=42,
 
     pct_above_1 = sum(1 for v in finals if v > 1.0) / n
     pct_above_11 = sum(1 for v in finals if v > 1.1) / n
+    pct_below_1 = sum(1 for v in finals if v < 1.0) / n
     pct_below_09 = sum(1 for v in finals if v < 0.9) / n
     pct_below_07 = sum(1 for v in finals if v < 0.7) / n
     pct_jevons = sum(1 for m in margins if m > 0) / n
@@ -211,12 +212,22 @@ def write_market_mc_report(results, n_years, n_iterations, seed=42,
     L.append("")
     L.append("## 3. Verdicts — how often does each outcome occur?")
     L.append("")
-    L.append(f"| Outcome at year {n_years} | Share of runs |")
+    L.append(f"**Direction at year {n_years}** — mutually exclusive, sums to 100%:")
+    L.append("")
+    L.append("| Direction | Share of runs |")
     L.append("|---|---|")
-    L.append(f"| Final employment > baseline (1.0×) — net job growth | **{pct_above_1:.1%}** |")
-    L.append(f"| Final employment > 1.1× — clear expansion | {pct_above_11:.1%} |")
-    L.append(f"| Final employment < 0.9× — clear contraction | {pct_below_09:.1%} |")
-    L.append(f"| Final employment < 0.7× — severe contraction | {pct_below_07:.1%} |")
+    L.append(f"| More engineers than today (>1.0×) | **{pct_above_1:.1%}** |")
+    L.append(f"| Fewer engineers than today (<1.0×) | {pct_below_1:.1%} |")
+    L.append("")
+    L.append("**Severity bands** — cumulative tails *nested within* the rows above, so "
+             "they do **not** add to 100% (each is a subset, and the 0.9×–1.1× middle is "
+             "not shown):")
+    L.append("")
+    L.append("| Band | Share of runs |")
+    L.append("|---|---|")
+    L.append(f"| Clear expansion (>1.1×) | {pct_above_11:.1%} |")
+    L.append(f"| Clear contraction (<0.9×) | {pct_below_09:.1%} |")
+    L.append(f"| Severe contraction (<0.7×) | {pct_below_07:.1%} |")
     L.append("")
     if correlations:
         L.append("## 4. What drives the outcome")
@@ -279,6 +290,7 @@ def write_firm_mc_report(results, n_years, n_iterations, profile_name="",
     bey_nevers = sum(1 for r in results if r.break_even_year is None)
 
     pct_above = sum(1 for v in finals if v > 1.0) / n
+    pct_below = sum(1 for v in finals if v < 1.0) / n
     pct_expand = sum(1 for v in finals if v > 1.30) / n
     pct_harvest = sum(1 for v in finals if v < 0.85) / n
     pct_senior_gt_junior = sum(1 for r in results if r.final_senior > r.final_junior) / n
@@ -323,12 +335,24 @@ def write_firm_mc_report(results, n_years, n_iterations, profile_name="",
     L.append("")
     L.append("## 2. Verdicts")
     L.append("")
-    L.append("| Outcome | Share of runs |")
+    L.append("**Direction** — mutually exclusive, sums to 100%:")
+    L.append("")
+    L.append("| Direction | Share of runs |")
     L.append("|---|---|")
-    L.append(f"| Final headcount > baseline (1.0×) | **{pct_above:.1%}** |")
-    L.append(f"| Final headcount > 1.30× (expand) | {pct_expand:.1%} |")
-    L.append(f"| Final headcount < 0.85× (harvest) | {pct_harvest:.1%} |")
-    L.append(f"| Senior index > junior index | {pct_senior_gt_junior:.1%} |")
+    L.append(f"| More headcount than today (>1.0×) | **{pct_above:.1%}** |")
+    L.append(f"| Less headcount than today (<1.0×) | {pct_below:.1%} |")
+    L.append("")
+    L.append("**Severity bands** — cumulative tails *nested within* the rows above, so "
+             "they do **not** add to 100%:")
+    L.append("")
+    L.append("| Band | Share of runs |")
+    L.append("|---|---|")
+    L.append(f"| Expand (>1.30×) | {pct_expand:.1%} |")
+    L.append(f"| Harvest (<0.85×) | {pct_harvest:.1%} |")
+    L.append("")
+    L.append(f"Separately, the **senior tier ends above the junior tier in "
+             f"{pct_senior_gt_junior:.1%} of runs** (a different dimension — tier mix, "
+             f"not overall direction).")
     L.append("")
     L.append("## 3. Management fork distribution")
     L.append("")
@@ -397,6 +421,7 @@ def _market_stats(results):
         "g_demands": g_demands, "g_prods": g_prods,
         "never_declines": sum(1 for r in results if r.break_even_year is None) / n,
         "above_1": sum(1 for v in finals if v > 1.0) / n,
+        "below_1": sum(1 for v in finals if v < 1.0) / n,
         "above_11": sum(1 for v in finals if v > 1.1) / n,
         "below_09": sum(1 for v in finals if v < 0.9) / n,
         "below_07": sum(1 for v in finals if v < 0.7) / n,
@@ -420,6 +445,7 @@ def _firm_stats(results):
         "gaps": [r.final_senior - r.final_junior for r in results],
         "never_declines": sum(1 for r in results if r.break_even_year is None) / n,
         "above_1": sum(1 for v in finals if v > 1.0) / n,
+        "below_1": sum(1 for v in finals if v < 1.0) / n,
         "above_13": sum(1 for v in finals if v > 1.30) / n,
         "below_085": sum(1 for v in finals if v < 0.85) / n,
         "senior_gt_junior": sum(1 for r in results if r.final_senior > r.final_junior) / n,
@@ -478,14 +504,23 @@ def write_combined_mc_report(market_results, firm_results, n_years, n_iterations
     L.append("")
     L.append("## 2. Direction of outcomes")
     L.append("")
-    L.append("| Outcome | Market | Firm |")
-    L.append("|---|---|---|")
-    L.append(f"| Ends above baseline (>1.0×) | {m['above_1']:.1%} | {fr['above_1']:.1%} |")
-    L.append(f"| Clear expansion | {m['above_11']:.1%} (>1.1×) | {fr['above_13']:.1%} (>1.3×) |")
-    L.append(f"| Contraction | {m['below_09']:.1%} (<0.9×) / {m['below_07']:.1%} (<0.7×) "
-             f"| {fr['below_085']:.1%} (<0.85×) |")
+    L.append("**Primary split** — mutually exclusive, sums to 100%:")
     L.append("")
-    L.append("*(Verdict thresholds differ between the two models — read the bands, not "
+    L.append("| Direction | Market | Firm |")
+    L.append("|---|---|---|")
+    L.append(f"| More engineers than today (>1.0×) | {m['above_1']:.1%} | {fr['above_1']:.1%} |")
+    L.append(f"| Fewer engineers than today (<1.0×) | {m['below_1']:.1%} | {fr['below_1']:.1%} |")
+    L.append("")
+    L.append("**Severity bands** — cumulative tails *nested within* the rows above, so they "
+             "do **not** add to 100% (e.g. >1.1× is a subset of >1.0×):")
+    L.append("")
+    L.append("| Band | Market | Firm |")
+    L.append("|---|---|---|")
+    L.append(f"| Clear expansion | {m['above_11']:.1%} (>1.1×) | {fr['above_13']:.1%} (>1.3×) |")
+    L.append(f"| Clear contraction | {m['below_09']:.1%} (<0.9×) | {fr['below_085']:.1%} (<0.85×) |")
+    L.append(f"| Severe contraction | {m['below_07']:.1%} (<0.7×) | — |")
+    L.append("")
+    L.append("*(Severity thresholds differ between the two models — read the bands, not "
              "just the percentages.)* Both lean toward growth; the firm leans more "
              "strongly and rarely severely contracts.")
     L.append("")

@@ -29,13 +29,23 @@ high-expansion tails the market aggregate shows.
 
 ## 2. Direction of outcomes
 
-| Outcome | Market | Firm |
-|---|---|---|
-| Ends **above** baseline (>1.0×) | 66.4% | **80.6%** |
-| Clear expansion | 53.2% (>1.1×) | 7.0% (>1.3×) |
-| Contraction | 20.9% (<0.9×) / 7.4% (<0.7×) | 0.6% (<0.85×) |
+**Primary split** — mutually exclusive, sums to 100%:
 
-*(Verdict thresholds differ between the two models — market uses 1.1×/0.9×/0.7×, firm
+| Direction | Market | Firm |
+|---|---|---|
+| More engineers than today (>1.0×) | 66.4% | **80.6%** |
+| Fewer engineers than today (<1.0×) | 33.6% | 19.4% |
+
+**Severity bands** — cumulative tails *nested within* the rows above, so they do **not**
+add to 100% (e.g. >1.1× is a subset of >1.0×; the 0.9×–1.1× middle isn't shown):
+
+| Band | Market | Firm |
+|---|---|---|
+| Clear expansion | 53.2% (>1.1×) | 7.0% (>1.3×) |
+| Clear contraction | 20.9% (<0.9×) | 0.6% (<0.85×) |
+| Severe contraction | 7.4% (<0.7×) | — |
+
+*(Severity thresholds differ between the two models — market uses 1.1×/0.9×/0.7×, firm
 uses 1.3×/0.85× — so read the bands, not just the percentages.)* Both lean toward growth;
 **the firm leans more strongly** and almost never severely contracts.
 

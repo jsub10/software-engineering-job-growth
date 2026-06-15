@@ -429,11 +429,15 @@ def print_market_mc_report(results: List[MarketMCResult]) -> None:
     row("Margin (D - P) %/yr", margins, ".1f")
     print(f"  {'Jevons holds (final yr)':30}  {pct_jevons_yr10:>8.1%} of runs")
 
+    pct_below_1 = sum(1 for r in results if r.final_employment < 1.0) / n
     print(f"\n── VERDICTS ─────────────────────────────────────────────────────")
-    print(f"  Final employment > baseline (1.0):  {pct_above_1:.1%} of runs")
-    print(f"  Final employment > 1.1×:            {sum(1 for r in results if r.final_employment > 1.1)/n:.1%} of runs")
-    print(f"  Final employment < 0.9×:            {sum(1 for r in results if r.final_employment < 0.9)/n:.1%} of runs")
-    print(f"  Final employment < 0.7×:            {sum(1 for r in results if r.final_employment < 0.7)/n:.1%} of runs")
+    print(f"  Direction (these two sum to 100%):")
+    print(f"    > baseline (1.0×) — more engineers:  {pct_above_1:.1%} of runs")
+    print(f"    < baseline (1.0×) — fewer engineers: {pct_below_1:.1%} of runs")
+    print(f"  Severity bands (nested tails — do NOT sum to 100%):")
+    print(f"    > 1.1× clear expansion:    {sum(1 for r in results if r.final_employment > 1.1)/n:.1%} of runs")
+    print(f"    < 0.9× clear contraction:  {sum(1 for r in results if r.final_employment < 0.9)/n:.1%} of runs")
+    print(f"    < 0.7× severe contraction: {sum(1 for r in results if r.final_employment < 0.7)/n:.1%} of runs")
 
     # Dominant parameter influence
     print(f"\n── PARAMETER INFLUENCE ──────────────────────────────────────────")
@@ -510,16 +514,20 @@ def print_firm_mc_report(results: List[FirmMCResult], profile_name: str = "") ->
 
     print(f"\n── VERDICTS ─────────────────────────────────────────────────────")
     pct_above = sum(1 for r in results if r.final_employment > 1.0) / n
+    pct_below = sum(1 for r in results if r.final_employment < 1.0) / n
     pct_harvest = sum(1 for r in results if r.final_employment < 0.85) / n
     pct_expand = sum(1 for r in results if r.final_employment > 1.30) / n
-    print(f"  Final headcount > baseline:    {pct_above:.1%} of runs")
-    print(f"  Final headcount > 1.30× (expand):  {pct_expand:.1%} of runs")
-    print(f"  Final headcount < 0.85× (harvest): {pct_harvest:.1%} of runs")
+    print(f"  Direction (these two sum to 100%):")
+    print(f"    > baseline (1.0×) — more headcount:  {pct_above:.1%} of runs")
+    print(f"    < baseline (1.0×) — less headcount:  {pct_below:.1%} of runs")
+    print(f"  Severity bands (nested tails — do NOT sum to 100%):")
+    print(f"    > 1.30× (expand):  {pct_expand:.1%} of runs")
+    print(f"    < 0.85× (harvest): {pct_harvest:.1%} of runs")
 
     pct_senior_above_junior = sum(
         1 for r in results if r.final_senior > r.final_junior
     ) / n
-    print(f"  Senior outperforms junior:     {pct_senior_above_junior:.1%} of runs")
+    print(f"  Senior outperforms junior:     {pct_senior_above_junior:.1%} of runs (tier mix, separate dimension)")
 
     print(f"\n── MANAGEMENT FORK DISTRIBUTION ─────────────────────────────────")
     for fork in ["HARVEST", "REINVEST", "EXPAND", "IMPROVE"]:
