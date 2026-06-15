@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 from market_model.core.demand_stocks import TechDebtParams, TechDebtStock
+from firm_model.core.firm_backlog import FirmBacklogStock, INDUSTRY_PARKINSON
 
 
 @dataclass
@@ -55,6 +56,11 @@ class FirmProfile:
     will_pass_savings_to_customers: bool = False
     competitive_intensity: str = "medium"
     capital_efficiency_pressure: str = "medium"
+
+    # Backlog Parkinson coefficient (optional override; defaults to industry value)
+    # How much freed capacity gets filled with new scope requests
+    # None = use industry default from INDUSTRY_PARKINSON table
+    firm_parkinson_override: float = None   # NO EMPIRICAL BASIS
 
     # Agentic adoption
     agentic_adoption_rate: float = 0.30
@@ -120,6 +126,14 @@ class FirmModel:
         self.expand_bias = self.INDUSTRY_EXPAND_BIAS.get(profile.industry, 1.0)
         self.harvest_bias = self.INDUSTRY_HARVEST_BIAS.get(profile.industry, 1.0)
         self.improve_bias = self.INDUSTRY_IMPROVE_BIAS.get(profile.industry, 1.0)
+
+        # Initialize firm backlog stock (replaces static backlog_boost)
+        self.backlog_stock = FirmBacklogStock(
+            initial_months=profile.backlog_months,
+            industry=profile.industry,
+            parkinson_override=getattr(profile, 'firm_parkinson_override', None),
+            floor_months=1.0,
+        )
 
         # Initialize tech debt stock for this firm
         debt_focus = 0.40 if profile.has_legacy_modernization else 0.20
@@ -213,6 +227,7 @@ class FirmModel:
         g_productivity: float,
         adoption: float,
         prev_headcount_index: float,
+        backlog_demand_factor: float = 1.0,
     ) -> Tuple[float, Dict[str, float]]:
         """
         Derive headcount index from fork weights and market signal.
@@ -235,7 +250,10 @@ class FirmModel:
         # EXPAND: grows with demand, modulated by revenue trajectory and backlog
         g_rev = self._saturating_growth_rate(year)
         rev_factor = min(2.5, (1.0 + g_rev) ** (year * 0.30))  # partial compounding
-        backlog_boost = min(0.40, self.p.backlog_months / 30.0)
+        # V5 FIX: backlog_boost now uses dynamic FirmBacklogStock
+        # demand_factor fades as backlog is cleared and refills via Parkinson
+        # (backlog_state is passed in from run() where it is stepped each year)
+        backlog_boost = min(0.40, backlog_demand_factor * 0.40)
         h_expand_uncapped = market_index * rev_factor * (1.0 + backlog_boost)
 
         # V4 CORRECTION: absorption cap — cannot grow faster than 35%/yr
@@ -261,8 +279,31 @@ class FirmModel:
         }
         return blended, contributions
 
-    def _tier_adjustments(self, year: int, fork: ForkWeights) -> Dict[str, float]:
-        """Tier-specific adjustments by fork strategy."""
+    def _tier_adjustments(self, year: int, fork: ForkWeights,
+                          cognitive_scope: float = 0.0) -> Dict[str, float]:
+        """
+        Tier-specific adjustments by fork strategy.
+
+        V5: cognitive leverage is applied on top of fork adjustments.
+
+        Senior engineers / architects spend more time on cognitive tasks
+        (architecture, debugging, requirements). Cognitive tools therefore
+        give them MORE leverage — they can pursue more ambitious projects
+        with the same headcount.
+
+        Junior engineers have LESS leverage from cognitive tools because
+        cognitive assistance requires domain expertise to direct effectively.
+        A junior engineer doesn't yet know what architectural question to ask.
+
+        cognitive_leverage_factor:
+          architect: 1.60  (70% cognitive work)
+          senior:    1.40  (55% cognitive work)
+          mid:       1.10  (35% cognitive work)
+          junior:    0.70  (15% cognitive work — REDUCED, not improved)
+
+        The leverage is modulated by cognitive_scope (how much cognitive work
+        is AI-assisted this year). At cognitive_scope=0, reverts to v4 exactly.
+        """
         j_frac = self.p.junior_fraction
 
         junior_adj = (
@@ -271,14 +312,12 @@ class FirmModel:
             + fork.expand   * (1.0 - 0.04 * min(1.0, year / 5.0))
             + fork.improve  * (1.0 - 0.05 * min(1.0, year / 5.0))
         )
-
         senior_adj = (
             fork.harvest  * (1.0 + 0.05 * min(1.0, year / 5.0))
             + fork.reinvest * (1.0 + 0.18 * min(1.0, year / 5.0))
             + fork.expand   * (1.0 + 0.30 * min(1.0, year / 5.0))
-            + fork.improve  * (1.0 + 0.25 * min(1.0, year / 4.0))  # IMPROVE: senior-led
+            + fork.improve  * (1.0 + 0.25 * min(1.0, year / 4.0))
         )
-
         mid_adj = (
             fork.harvest  * (1.0 - 0.12 * min(1.0, year / 5.0))
             + fork.reinvest * (1.0 - 0.01 * min(1.0, year / 5.0))
@@ -286,9 +325,27 @@ class FirmModel:
             + fork.improve  * (1.0 + 0.02 * min(1.0, year / 5.0))
         )
 
+        # V5: apply cognitive leverage on top of fork adjustments
+        # leverage_boost = (factor - 1.0) × cognitive_scope
+        # junior factor = 0.70 means cognitive tools REDUCE their relative demand
+        # (they can't direct cognitive AI as effectively as seniors)
+        if cognitive_scope > 0.001:
+            cog_leverage = {
+                "junior":    0.70,
+                "mid":       1.10,
+                "senior":    1.40,
+                "architect": 1.60,
+            }
+            junior_adj   = max(0.10, junior_adj   * (1.0 + (cog_leverage["junior"]    - 1.0) * cognitive_scope))
+            mid_adj      = max(0.10, mid_adj       * (1.0 + (cog_leverage["mid"]       - 1.0) * cognitive_scope))
+            senior_adj   = max(0.10, senior_adj    * (1.0 + (cog_leverage["senior"]    - 1.0) * cognitive_scope))
+            architect_adj = max(0.10, senior_adj * 1.06 * (1.0 + (cog_leverage["architect"] - 1.0) * cognitive_scope))
+        else:
+            architect_adj = senior_adj * 1.06
+
         return {
             "junior": junior_adj, "mid": mid_adj,
-            "senior": senior_adj, "architect": senior_adj * 1.06
+            "senior": senior_adj, "architect": architect_adj,
         }
 
     def run(self) -> List[FirmYearResult]:
@@ -308,10 +365,15 @@ class FirmModel:
             debt_out = self.debt_stock.step(output_growth, adoption, debt_focus_override)
             effective_prod = g_productivity - debt_out["productivity_drag"]
 
+            # Step firm backlog stock (V5 fix: replaces static backlog_boost)
+            backlog_state = self.backlog_stock.step(productivity_gain=max(0.0, effective_prod))
+
             blended, contribs = self._headcount_from_fork(
-                fork, market_index, year, effective_prod, adoption, prev_hc_index
+                fork, market_index, year, effective_prod, adoption, prev_hc_index,
+                backlog_demand_factor=backlog_state.demand_factor,
             )
-            tier_adj = self._tier_adjustments(year, fork)
+            cog_scope = be.cognitive_scope if hasattr(be, "cognitive_scope") else 0.0
+            tier_adj = self._tier_adjustments(year, fork, cognitive_scope=cog_scope)
 
             mid_frac = max(0.01, 1.0 - self.p.junior_fraction - self.p.senior_fraction)
             weighted_index = (
@@ -330,6 +392,9 @@ class FirmModel:
                 notes.append("HARVEST: significant headcount reduction underway by year 2.")
             if year == 3 and fork.primary == "EXPAND" and blended > 1.4:
                 notes.append("EXPAND: rapid growth; absorption cap may be binding.")
+            if year == 5 and backlog_state.demand_factor < 0.30:
+                notes.append(f"Backlog demand factor fading ({backlog_state.demand_factor:.2f}); "
+                              f"backlog now {backlog_state.backlog_months:.1f}mo.")
             if self.p.has_legacy_modernization and year <= 3:
                 notes.append("Legacy modernization: near-term engineering demand elevated.")
             if fork.primary == "IMPROVE" and year == 5:
@@ -389,6 +454,12 @@ class FirmModel:
             lines.append("  → Efficiency gains used for quality/debt. Headcount roughly flat.")
 
         lines += [
+            f"",
+            f"Backlog dynamics:",
+            f"  Initial backlog:      {self.p.backlog_months:.0f} months",
+            f"  Firm Parkinson coeff: {self.backlog_stock.parkinson_coefficient:.2f}  "
+            f"(industry default for {self.p.industry})",
+            f"  (Higher Parkinson → scope refills faster → headcount demand persists longer)",
             f"",
             f"YEAR 3:  HC index {yr3.headcount_index:.3f} → {yr3.headcount_absolute} engineers  "
             f"(vs market {yr3.market_index:.3f})  debt {yr3.debt_level:.0f}%",

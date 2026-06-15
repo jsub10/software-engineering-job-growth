@@ -82,15 +82,54 @@ class MarketModelResult:
         return self.employment_index
 
     def by_tier(self, year: int) -> Dict[str, float]:
-        """Tier-adjusted employment at a given year."""
+        """
+        Tier-adjusted employment at a given year.
+
+        V5: cognitive leverage is applied on top of v4 tier adjustments.
+        Senior/architect engineers benefit MORE from cognitive tools
+        (they spend more time on architectural reasoning, debugging, requirements).
+        Junior engineers benefit LESS (cognitive tools require expertise to direct).
+
+        cognitive_leverage_factor (from v5_cognitive_additions.md):
+          architect: 1.60 (70% cognitive work, highest leverage)
+          senior:    1.40 (55% cognitive work)
+          mid:       1.10 (35% cognitive work)
+          junior:    0.70 (15% cognitive work, requires expertise to direct AI)
+
+        The leverage is modulated by cognitive_scope — how much cognitive work
+        is actually AI-assisted at this year. Early years: small effect.
+        Later years: larger effect as cognitive scope expands.
+        """
         idx = self.employment_index.get(year, 1.0)
         t = min(1.0, year / 7.0)
-        return {
+
+        # Cognitive scope at this year (from most recent breakeven result)
+        cog_scope = 0.0
+        if self.breakeven and year <= len(self.breakeven):
+            cog_scope = self.breakeven[year - 1].cognitive_scope
+
+        # Cognitive leverage: how much cognitive scope boosts each tier
+        cog_leverage = {
+            "junior":    0.70,  # LESS leverage — needs expertise to direct AI
+            "mid":       1.10,
+            "senior":    1.40,
+            "architect": 1.60,
+        }
+
+        # Apply cognitive leverage: (leverage - 1) × cog_scope × tier_idx
+        # At cog_scope=0: no cognitive effect (reverts to v4)
+        # At cog_scope=0.3: cognitive leverage fully applied
+        def tier_idx(base_idx, lever):
+            cognitive_boost = (lever - 1.0) * cog_scope * base_idx
+            return max(0.10, base_idx + cognitive_boost)
+
+        base = {
             "junior":    max(0.10, idx * (1.0 - 0.18 * min(1.0, year / 5.0))),
             "mid":       max(0.20, idx * (1.0 - 0.04 * min(1.0, year / 5.0))),
             "senior":    max(0.30, idx * (1.0 + 0.22 * t)),
             "architect": max(0.30, idx * (1.0 + 0.28 * t)),
         }
+        return {tier: tier_idx(base[tier], cog_leverage[tier]) for tier in base}
 
     @property
     def employment_by_tier(self) -> Dict[int, Dict[str, float]]:
@@ -117,13 +156,21 @@ class MarketModelResult:
 def _build_params(config: dict):
     phi = config["production"]["phi"]
 
+    cog = config.get("cognitive", {})
     prod = ProductivityParams(
         alpha_experienced=config["labor"]["alpha_experienced"],
         alpha_routine=config["labor"]["alpha_routine"],
         f_auto=config["labor"]["f_auto"],
         f_verify=config["labor"]["f_verify"],
         g_tools=config["labor"]["g_tools"],
+        alpha_maturation_years=config["labor"].get("alpha_maturation_years", 5.0),
         phi=phi,
+        # V5 cognitive additions (all NO EMPIRICAL BASIS)
+        alpha_cognitive=cog.get("alpha_cognitive", 0.0),
+        f_cognitive=cog.get("f_cognitive", 0.35),
+        cognitive_scope_max=cog.get("cognitive_scope_max", 0.0),
+        cognitive_growth_rate=cog.get("cognitive_growth_rate", 0.15),
+        cognitive_maturation_years=cog.get("cognitive_maturation_years", 8.0),
     )
     elast = ElasticityParams(
         price_elasticity=config["demand"]["price_elasticity"],

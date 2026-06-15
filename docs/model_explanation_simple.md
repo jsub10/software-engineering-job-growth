@@ -1,230 +1,316 @@
 # Will Agentic Coding Increase or Decrease the Number of Software Engineers?
-## A Plain-Language Guide to the Model
+## A Plain-Language Guide to the Model (v5)
 
 ---
 
 ### The Central Question
 
-Agentic coding tools — AI systems that can write, test, and deploy software with minimal
-human direction — are making software engineers dramatically more productive. When a
-technology makes workers more productive, one of two things happens:
+Agentic coding tools — AI systems that can write, test, debug, and deploy software
+with minimal human direction — are making software engineers more productive.
+When a technology makes workers more productive, one of two things historically happens:
 
-**More output, same workers:** The productivity gain gets reinvested in building more
-software. Employment stays flat or grows because there was always more software
-to build than engineers to build it.
+  MORE OUTPUT, SAME WORKERS: the productivity gain gets reinvested in building
+  more software. Employment stays flat or grows because there was always more
+  software worth building than engineers to build it.
 
-**Same output, fewer workers:** The productivity gain gets harvested as cost reduction.
-Fewer engineers produce the same software as before. Employment falls.
+  SAME OUTPUT, FEWER WORKERS: the productivity gain gets harvested as cost
+  reduction. Fewer engineers produce the same software as before. Employment falls.
 
-Which one happens for software engineering is the central question this model tries
-to answer.
+Which happens for software engineering? This model tries to answer that question.
 
 ---
 
 ### The Short Answer
 
-We genuinely do not know — and anyone who tells you confidently is probably wrong.
+We genuinely do not know. The model's base case says:
 
-What we can say is:
+  Engineers peak at about 11% above baseline by year 4.
+  Employment starts declining in year 5.
+  By year 10, still about 2% above baseline.
 
-- **In the near term (years 1-3):** demand likely grows faster than productivity.
-  There is a large existing backlog of work that suddenly becomes viable, and tools
-  take time to reach most engineers. Jevons holds: more software gets built,
-  employment stays flat or grows slightly.
-
-- **In the medium term (years 4-7):** it depends on two things we cannot measure:
-  how fast agentic tools improve, and what fraction of firms decide to harvest
-  versus reinvest the efficiency gain.
-
-- **In the long term (years 8-10):** productivity growth from tools is likely to
-  outpace demand growth unless new software categories emerge at scale.
-  Employment probably falls unless new markets open.
-
-The most important insight: **the near term looks better for engineers than the long term.**
+But this single trajectory hides a very wide range of plausible outcomes.
+The two parameters that matter most — how fast AI tools improve and how much
+freed engineering capacity gets immediately filled with new work — have no
+empirical calibration. Depending on those two parameters, the break-even year
+(when employment starts declining from its peak) ranges from year 3 to "never
+within a decade." The model is honest about this range rather than hiding it
+in a single number.
 
 ---
 
-### Why We Can't Just Say "More Productive = Fewer Jobs"
+### What the Model Actually Predicts
 
-The naive view is: if each engineer can do twice the work, you need half as many
-engineers. But this has been wrong repeatedly in history.
+The model outputs three numbers that together tell the story better than any
+single employment index:
 
-**ATMs were supposed to eliminate bank tellers.** Instead, because each branch cost
+  PEAK EMPLOYMENT — how high above baseline engineers get before the decline.
+  BREAK-EVEN YEAR — when employment peaks and starts declining.
+  FINAL EMPLOYMENT — where employment lands at year 10.
+
+The break-even year is the most useful of the three because it answers a
+practical question: how long does the window of rising engineering employment
+last before productivity gains outpace demand growth?
+
+Under base assumptions (year 5 break-even), this window is about four years.
+If tools improve faster than assumed, it shrinks to two or three years.
+If demand is more elastic than assumed, it extends to seven or eight years.
+
+---
+
+### Why the Answer Isn't Simply "More Productive = Fewer Jobs"
+
+The naive view is: if each engineer can do twice the work, you need half as many.
+This has been wrong repeatedly in the history of productivity-enhancing technology.
+
+ATMs were supposed to eliminate bank tellers. Instead, because each branch cost
 less to staff, banks opened more branches. Total teller employment went up.
 
-**Spreadsheets were supposed to eliminate accountants.** Instead, spreadsheets made
-financial analysis faster and cheaper, so organizations did far more of it. Accountant
-employment went up.
+Spreadsheets were supposed to eliminate accountants. Instead, spreadsheets made
+financial analysis faster and cheaper, so organizations did far more of it.
+Employment went up.
 
-**CAD software was supposed to eliminate engineering draftspeople.** Instead, it made
+CAD software was supposed to eliminate engineering draftspeople. Instead it made
 iteration cheaper, so engineers designed more complex products. Employment went up.
 
-**Word processors eliminated typists and secretaries.** Managers started typing
-their own documents. Employment went down sharply.
+Word processors eliminated typists and secretaries. Managers started typing their
+own documents. Employment fell sharply.
 
-What determined the outcome was whether the productivity gain opened up new demand —
-new things to build that weren't feasible before — or just made the existing thing
-cheaper. Software engineering looks much more like CAD and spreadsheets than like
-word processing, for a specific reason: there has always been far more software
-worth building than engineers available to build it.
-
----
-
-### The Three Things That Determine the Outcome
-
-**1. How fast do the tools actually improve?**
-
-This is what we know least about. Current evidence is mixed: a rigorous randomized
-controlled trial (METR, July 2025) found that experienced developers were actually
-19% *slower* with early 2025 AI tools on complex, mature codebases. But developers
-on simple, new projects report 20-55% speedups. The tools are improving rapidly
-and the picture will look different in 2-3 years.
-
-The model does not know how fast tools will improve. What it tells you is:
-if tools improve faster than X% per year, employment falls. If slower, it rises.
-That threshold — X — is the model's most useful output.
-
-**2. How much of the efficiency gain gets passed to the market vs. kept as profit?**
-
-If software companies use agentic tools to produce the same products at lower cost
-and pocket the difference as margin, demand for software does not grow. Fewer
-engineers are needed.
-
-If they pass the savings to customers through lower prices or more features,
-software demand grows because new buyers can now afford it, or existing buyers
-buy more. More engineers are needed.
-
-This is the most important variable in the model and the one with no good data.
-It depends on competitive dynamics, management philosophy, and capital markets
-pressure in ways that vary enormously by firm and industry.
-
-**3. What does each individual firm decide to do?**
-
-The model calls this the "management fork." When your engineers become more
-productive, your firm faces a choice:
-
-- **Harvest:** Take the productivity gain as cost savings. Reduce headcount over time.
-  *Who does this: firms where software is a cost center, not a product; low competition;
-  pressure to improve margins.*
-
-- **Reinvest:** Keep headcount flat, produce more and better software with the same team.
-  *Who does this: firms where software is the product but competitive pressure is moderate;
-  want quality improvements.*
-
-- **Expand:** Hire more engineers because you now have more projects that are viable at
-  lower cost. Use productivity gain to grow.
-  *Who does this: high-growth firms, strong competition, large backlog of work waiting.*
-
-- **Improve:** Use the productivity gain to fix things that have been deferred — technical
-  debt, refactoring, quality. Headcount stays flat. This is different from Reinvest
-  because output quantity doesn't grow; output quality does.
-  *Who does this: regulated industries, firms with high technical debt, mature products.*
-
-Most firms will do some mix. But the primary strategy matters enormously: two firms
-with identical engineers and identical tools will have very different headcount
-trajectories based on which fork they choose.
+What determined the outcome was whether the productivity gain opened up new
+demand — new things to build that weren't feasible before — or just made the
+existing thing cheaper to produce. Software engineering looks much more like
+CAD and spreadsheets than word processing, because there has always been far
+more software worth building than engineers available to build it.
 
 ---
 
-### Three Things the Model Gets Right That Simpler Analyses Miss
+### The Demand Side: Why Employment Rises Before It Falls
 
-**1. Backlog and technical debt never go to zero — and they keep accumulating.**
+In the first few years, several demand forces work together to keep employment
+above baseline even as productivity rises:
 
-The near-term employment boost from agentic coding partly comes from clearing the
-enormous backlog of work that software teams have. But backlog doesn't just get
-cleared — it also grows. As teams ship faster, product managers ask for more.
-As new possibilities open up, new projects get added. And AI-generated code actually
-creates *more* technical debt per line than human-written code, because it tends
-to produce more copy-paste code and less well-structured code.
+  BACKLOG CLEARANCE: Every software organization has a backlog of work that
+  couldn't be done before because capacity was the bottleneck. When productivity
+  rises, this backlog starts getting cleared — creating real demand for
+  engineering work that wasn't being met before. This is front-loaded: it
+  creates the biggest demand boost in the first two to four years.
 
-This means the demand surge from clearing backlog is real but smaller than a naive
-model suggests, and it doesn't last as long. The ongoing demand from new backlog
-accumulation is more persistent but grows more slowly.
+  TECHNICAL DEBT: About 40% of engineering capacity in a typical organization
+  goes to maintaining and working around legacy code rather than building new
+  things. As AI tools make refactoring cheaper, organizations begin addressing
+  debt they've deferred for years. This is also front-loaded but creates
+  meaningful demand for a few years.
 
-**2. Markets saturate.**
+  UNDERSERVED MARKETS: Many sectors have been too expensive to serve with
+  custom software — small businesses, agriculture, local government, nonprofits.
+  As software gets cheaper to build, these markets begin to open. This demand
+  activates later (around year 4-5 in the base case) and then slowly depletes
+  as the market gets served.
 
-Agentic coding will not cause software to consume 100% of economic activity. At some
-point, every potential customer has been served, every useful software product has
-been built, and the marginal return on new software falls. The model explicitly caps
-demand at plausible maximum levels — something that prior versions did not do.
-
-**3. Junior engineers are the most exposed, but the pipeline matters.**
-
-Agentic tools are most effective at the kinds of tasks junior engineers do: routine
-code, documentation, testing, debugging simple bugs. This is already showing up in
-data — entry-level software job postings have fallen 28% from their 2022 peak.
-
-But if junior roles disappear, where do senior engineers come from in 10 years?
-Senior engineers develop through years of doing junior work. If that pathway is cut,
-there will be a shortage of senior engineers around 2030-2033 even if overall
-headcount appears stable today. The model tracks this pipeline effect with a lag.
+All three of these demand forces eventually exhaust themselves. The backlog
+gets cleared. The debt gets addressed. The underserved markets get served.
+Meanwhile, productivity keeps growing as more engineers adopt tools and
+tools keep improving. That's why employment eventually peaks and starts falling.
 
 ---
 
-### What to Watch to Know Which Way This Goes
+### Parkinson's Law and Why Employment Stays High Longer Than You'd Expect
 
-The model identifies four things that will determine whether engineer employment
-rises or falls over the next decade. Track these:
+There's a counterweight to the demand exhaustion: organizations tend to fill
+available capacity with new work. When your engineering team gets 20% more
+productive, product managers tend to ask for 20% more features. This is
+Parkinson's Law applied to software development.
 
-**Watch the METR study.** The nonprofit METR is running randomized controlled trials
-measuring actual AI productivity effects on experienced developers. Their early-2025
-study found a 19% slowdown. Their late-2025 study (using newer tools) is ongoing.
-If the updated study shows strong productivity gains, the break-even threshold shifts
-dramatically and Jevons becomes much harder to sustain.
+The model captures this through a "Parkinson coefficient" — a measure of how
+much freed capacity gets immediately filled with new scope. At the base setting
+(25%), one-quarter of every productivity gain becomes new work rather than
+cost savings. This is why the backlog keeps refilling even as it gets cleared,
+and why demand stays elevated longer than a simple one-time-release model
+would suggest.
 
-**Watch enterprise software pricing.** If major enterprise software companies
-(Salesforce, SAP, ServiceNow, Workday) start cutting prices as their development
-costs fall, it means savings are being passed to the market — a positive sign for
-employment. If their margins expand without price reductions, savings are being
-harvested.
-
-**Watch entry-level hiring at large tech firms.** The 28% decline in entry-level
-postings is a leading indicator of both short-term displacement and long-term
-pipeline damage. If it reverses, Jevons is winning. If it continues declining,
-the profession is restructuring away from junior roles.
-
-**Watch the size of software backlogs.** If firms report that their software
-backlogs are growing despite using AI tools (Parkinson's Law in action), demand
-is expanding to fill capacity and Jevons holds. If firms report completing their
-backlog and having nothing left to build, demand has saturated and employment will fall.
+Parkinson's Law is real — anyone who has managed an engineering team knows
+that faster engineers get asked to do more. But it has limits. Organizations
+don't have infinite valuable projects to build. Eventually, strategic priorities
+cap how much new scope gets approved, and the Parkinson effect weakens.
 
 ---
 
-### The Bottom Line
+### The New Thing in This Version: Cognitive Capability Replication
 
-Agentic coding will almost certainly change *who* software engineers are and *what
-they do* more than it will change *how many* there are — at least in the next
-five years.
+Previous versions of this model treated AI as automating a fixed fraction of
+engineering tasks — routine coding, testing, documentation. This is the right
+model for autocomplete-style tools.
 
-Junior and routine coding roles face the highest displacement risk. Senior roles
-involving architecture, requirements, oversight of AI systems, and complex judgment
-face the lowest risk and may see increasing demand.
+Agentic tools are beginning to do something qualitatively different: they are
+beginning to replicate aspects of how engineers *think*, not just what engineers *type*.
 
-Whether total headcount rises, falls, or stays flat over the decade depends on
-whether the demand expansion effect (more software gets built because it's cheaper)
-outpaces the productivity effect (each engineer produces more software). History
-suggests demand expansion wins more often than not when the technology opens up
-genuinely new possibilities. Agentic coding meets that test — but saturation,
-market limits, and management decisions about how to deploy efficiency gains will
-determine the actual outcome.
+Specifically, they are beginning to assist with:
 
-The honest answer is: we will know more in 18-24 months than we do today,
-and the METR productivity studies and enterprise pricing trends will be the
-earliest reliable signals.
+  ARCHITECTURAL REASONING: breaking a problem into solvable pieces, identifying
+  dependencies, proposing implementation approaches. Engineers spend significant
+  time here before writing any code. When AI can propose a credible decomposition
+  in minutes, engineers evaluate rather than generate.
+
+  CODEBASE CONTEXT SYNTHESIS: understanding a large existing codebase before
+  changing it. Engineers read and trace code for hours before making a change.
+  AI can do this synthesis much faster.
+
+  DEBUGGING HYPOTHESIS GENERATION: reasoning about what could be wrong, designing
+  tests to distinguish between hypotheses. Not routine. But AI is surprisingly
+  good at this for known bug patterns.
+
+  REQUIREMENTS FORMALIZATION: turning vague business needs into precise technical
+  specifications. This has always been considered fully human. It's becoming
+  partially AI-assisted.
+
+This cognitive assistance changes the productivity story in two ways:
+
+First, productivity grows faster and to a higher ceiling than pure task
+automation would predict. This means employment peaks sooner and falls
+faster than the base model (before adding cognitive tools) suggests.
+
+Second — and this is the important distributional effect — cognitive tools are
+*not equally useful* to all engineers.
+
+A senior engineer or architect who spends 60-70% of their time on architectural
+reasoning, complex debugging, and specification can get enormous leverage from
+cognitive tools. Their judgment is amplified.
+
+A junior engineer who spends most of their time on routine coding — and who
+doesn't yet have the domain expertise to know what architectural question to
+ask — gets less benefit from cognitive tools than from routine automation tools.
+You need to know what you're looking for before AI can help you find it.
+
+The model therefore predicts that cognitive tools widen the productivity gap
+between senior and junior engineers. Under the optimistic cognitive scenario,
+senior employment is 50%+ above baseline while junior employment is 25% below
+baseline by year 10. The profession polarizes.
 
 ---
 
-### A Note on Model Limitations
+### What Determines Which Way This Goes
 
-This model is a thinking tool, not a prediction. It forces assumptions to be made
-explicit and shows how different assumptions lead to different conclusions. It should
-not be used to produce precise headcount forecasts. It should be used to:
+There are three things to watch that will tell you whether the break-even
+year arrives in year 3 or year 8:
 
-- Understand which variables matter most
-- Identify what to watch as leading indicators
-- Think through how a specific firm's characteristics affect its likely trajectory
-- Stress-test intuitions about AI and employment by making the reasoning explicit
+  1. HOW FAST TOOLS ACTUALLY IMPROVE
+     The model runs on a 20%/yr tool improvement rate. This is the most
+     impactful uncalibrated number in the entire model. At 10%/yr,
+     employment keeps rising throughout the decade. At 35%/yr, employment
+     starts falling by year 2-3. The METR randomized controlled trial
+     (July 2025) found tools actually *slowed* experienced developers by 19%
+     on complex mature codebases in early 2025. But tools have improved since
+     then, and METR is running a follow-up. That study will be the most
+     informative empirical signal available.
 
-The nine parameters in the model with no empirical basis are explicitly flagged.
-Any scenario that hinges primarily on those parameters should be treated as
-illustrative, not predictive.
+  2. HOW STRONG PARKINSON'S LAW IS
+     If freed capacity immediately refills with new scope (strong Parkinson),
+     demand stays elevated and break-even arrives later. If organizations
+     actually harvest the efficiency gains rather than expanding scope, demand
+     falls quickly and break-even arrives sooner. The model's cross-plot
+     (run: python run.py --crossplot) shows break-even ranging from year 3
+     to "never" depending on these two parameters alone.
+
+  3. WHAT MANAGEMENT DECIDES TO DO WITH EFFICIENCY GAINS
+     This is the pivotal question the model cannot answer from observable data.
+     When your engineers become more productive, do you reduce headcount
+     (harvest), keep the same team and build more (reinvest), hire more
+     because new projects are now viable (expand), or use the gains to fix
+     the code quality backlog (improve)? This decision varies enormously by
+     firm, competitive environment, and management philosophy. The firm model
+     classifies each firm into one of these four strategies based on observable
+     characteristics, but the actual choice depends on factors the model cannot
+     see.
+
+---
+
+### What Individual Firms Should Expect
+
+The model's firm-level forecasts reflect four very different trajectories
+depending on management strategy:
+
+  HARVEST FIRMS (government IT, manufacturing IT, cost-center software):
+  Headcount likely falls 10-30% over the decade as productivity gains are
+  captured as cost reduction. The backlog gets cleared but not refilled.
+  Low competitive pressure means there's no urgency to reinvest.
+
+  REINVEST FIRMS (enterprise SaaS, mid-market tech):
+  Headcount stays roughly flat. Engineers produce more software with the same
+  team. Revenue grows; margins improve. Senior roles grow slightly; junior
+  roles shrink. Technical debt gets addressed.
+
+  EXPAND FIRMS (consumer tech, high-growth startups):
+  Headcount grows significantly early as the large backlog gets cleared and
+  new projects become viable. Growth moderates as backlog depletes and revenue
+  growth decelerates toward long-run rates. The absorption cap (35%/yr maximum
+  hiring pace) prevents unrealistic explosive growth.
+
+  IMPROVE FIRMS (regulated industries, high-debt legacy systems):
+  Headcount flat. Engineering productivity gains absorbed into quality
+  improvement, compliance work, and technical debt reduction. The codebase
+  gets better but headcount doesn't change much. This is actually a common
+  outcome that simple models miss entirely.
+
+The firm's current backlog is important early but not indefinitely. As AI tools
+clear the backlog, new scope refills at a rate that depends on the organization's
+culture and management approach — much faster at startups (where product managers
+immediately request more features) than at government agencies (where procurement
+limits scope expansion). The model now correctly models this depletion, rather
+than treating the backlog as a permanent demand boost.
+
+---
+
+### What This Model Cannot Tell You
+
+This model is honest about its limits:
+
+  It cannot forecast aggregate employment with precision. Too many key
+  parameters have no empirical basis. Treat it as a structured way of
+  thinking about the problem, not as a prediction.
+
+  It cannot model the transition path. The model shows where employment
+  will be in equilibrium, not how it gets there. Hiring lags, reskilling
+  time, and organizational inertia all matter in practice and are not
+  captured.
+
+  It cannot tell you which fork a specific firm will take. That depends
+  on management intent, which is not derivable from observable characteristics.
+  The fork classification is a hypothesis, not a measurement.
+
+  The cognitive component is entirely speculative. The V5 additions for
+  cognitive capability replication have no empirical basis. They represent
+  a structural hypothesis about where tools are heading, not a calibrated
+  estimate of where they are now. Run the model without cognitive tools
+  (scenario: cognitive_off) to see how much the cognitive assumption matters.
+
+---
+
+### The Most Honest Bottom Line
+
+Agentic coding will almost certainly change *who* software engineers are
+and *what they do* more than it changes *how many* there are — at least
+in the next five years.
+
+The near term is better for engineers than the long term. Employment rises
+before it falls, because demand forces (backlog clearance, debt remediation,
+newly viable markets) front-load positive effects while productivity growth
+starts slow due to low adoption and the METR-documented drag on experienced
+developers in complex codebases.
+
+The skill premium for senior engineers is growing, not shrinking. Cognitive
+tools amplify expertise. The engineers who know what architectural question
+to ask are getting more leverage, not less. The engineers doing routine
+work face more displacement.
+
+The fundamental uncertainty is whether the demand expansion from newly viable
+software (smarter products, newly affordable markets, qualitatively new
+categories) outpaces the productivity growth from tools. History suggests
+it often does — CAD, spreadsheets, and ATMs all created more jobs than they
+displaced. But word processors show it doesn't always. The difference is
+whether the technology opens up new things to do or just does the old things
+faster. The current evidence suggests agentic tools do both, making the
+outcome genuinely ambiguous.
+
+We will know substantially more in 18-24 months. The METR productivity
+study update, enterprise software pricing trends, and entry-level hiring
+patterns at large tech firms will be the earliest reliable signals of which
+way this is going.

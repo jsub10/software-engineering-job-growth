@@ -1,483 +1,381 @@
-# Agentic Coding Labor Model v4: Detailed Technical Explanation
+# Agentic Coding Labor Model v5: Detailed Technical Explanation
 
-## 1. What the Model Is For
+## 1. Purpose and Scope
 
-This model estimates the effect of agentic coding tools on software engineer employment,
-at both a market (aggregate) level and a firm level. It is a reasoning tool, not a
-forecasting tool. Its primary output is a break-even analysis: given what we know about
-demand, how fast would productivity need to grow before engineer employment starts falling?
-Its secondary output is a directional employment index.
+This model estimates the effect of agentic coding tools on software engineer
+employment over a ten-year simulation horizon. It operates at two levels:
 
-The model was built iteratively, with each version correcting structural errors in
-the previous one. Version 4 makes the following fundamental corrections over v3:
+  MARKET LEVEL: What happens to aggregate software engineer employment as
+  agentic coding reduces the unit cost of producing software?
 
-  - Backlog and technical debt are modeled as dynamic stocks with inflows and outflows,
-    not one-time stocks that exhaust to zero
-  - All demand components have saturation mechanisms preventing indefinite growth
-  - Underserved markets deplete as they are penetrated
-  - Induced demand has a finite total size governed by a Bass diffusion curve
-  - The firm model adds revenue saturation, an organizational absorption cap, and an
-    explicit IMPROVE branch to the management decision fork
+  FIRM LEVEL: Given a specific firm's characteristics, what happens to its
+  engineering headcount? How does the management decision about whether to
+  harvest efficiency gains or reinvest them determine the outcome?
+
+This is a reasoning tool, not a forecasting tool. Its primary value is
+forcing assumptions to be made explicit, identifying which parameters drive
+the outcome, and showing the range of plausible trajectories under different
+assumptions. It should not be used to produce precise headcount forecasts.
 
 ---
 
-## 2. Core Architecture
+## 2. Model Architecture
 
-### 2.1 The Production Function
+Three structural layers:
 
-The model is grounded in a software production function:
+  LAYER 1: MARKET MODEL (production function equilibrium)
+    Dynamic demand stocks with inflows/outflows (backlog, technical debt)
+    Saturating demand components (underserved markets deplete, induced demand
+    has finite size, aggregate ceiling via tanh saturation)
+    Bass diffusion for tool adoption dynamics
+    Break-even analysis as primary output (not employment index)
 
-  S(t) = A(t) × E(t)^phi
+  LAYER 2: COGNITIVE EXTENSION (V5)
+    Three-component alpha (task-substitution drag, routine gains, cognitive gains)
+    Cognitive scope expansion separate from f_auto (slower, lower ceiling)
+    Cognitive leverage tier multipliers (senior benefits more, junior less)
 
-where:
-  S(t)   = software output at time t (index, baseline = 1.0)
-  A(t)   = total factor productivity (captures agentic tool effectiveness)
-  E(t)   = engineer headcount (index, baseline = 1.0)
-  phi    = output elasticity of engineers (0 < phi <= 1; default 0.85)
-
-phi < 1 reflects diminishing returns: doubling engineers does not double output,
-because coordination costs, communication overhead, and sequential dependencies
-(Brooks' Law) mean the relationship is sublinear.
-
-Setting supply equal to demand and solving for equilibrium headcount:
-
-  E*(t) = (D(t) / A(t))^(1/phi)
-
-where D(t) is the demand ratio: how much software the market wants, relative to
-the no-agentic-coding baseline.
-
-### 2.2 The Break-Even Condition
-
-Employment is flat when dE*/dt = 0, which requires:
-
-  d(ln D)/dt = d(ln A)/dt
-
-In words: demand must grow at the same rate as productivity for employment to be flat.
-If demand grows faster than productivity, employment rises (Jevons holds).
-If productivity grows faster than demand, employment falls (Jevons fails).
-
-The break-even productivity growth rate is therefore:
-
-  g*_productivity = g_demand
-
-This is the primary output: given our best estimate of demand growth (which has
-more empirical grounding), what productivity growth rate would make employment flat?
-If actual productivity growth exceeds g*, Jevons fails.
-
-### 2.3 Why Break-Even Analysis Is the Primary Output
-
-The demand side has meaningful empirical grounding:
-  - Technical debt fraction: HIGH confidence (McKinsey 2023, Stack Overflow 2024)
-  - Price elasticity: MEDIUM confidence (industry pricing research)
-  - Market baseline growth: HIGH confidence (BLS Occupational Outlook)
-
-The productivity side has almost no empirical grounding:
-  - Tool improvement rate (g_tools): NO empirical basis
-  - Verification overhead: NO empirical basis
-  - Future capability trajectory: NO empirical basis
-
-Asking "what would productivity need to be?" tells practitioners what to watch,
-without requiring them to trust uncalibrated parameters.
+  LAYER 3: FIRM MODEL
+    Four-way management fork (Harvest, Reinvest, Expand, Improve)
+    Dynamic firm backlog stock (V5 fix: replaces permanent static boost)
+    Revenue saturation by market penetration
+    Organizational absorption cap (35%/yr maximum headcount growth)
 
 ---
 
-## 3. Demand Model (v4 Corrections)
+## 3. Primary Output: Three Numbers
 
-### 3.1 Overview
+The model leads with a trajectory shape, not a point estimate:
 
-The demand model computes D(t): the ratio of software demand under agentic coding
-to what it would have been without. D(t) = 1.0 means no change; D(t) = 1.5 means
-50% more software demanded.
+  PEAK EMPLOYMENT: max employment index above baseline during simulation
+  BREAK-EVEN YEAR: first year employment starts declining from peak
+  FINAL EMPLOYMENT: employment level at year 10
 
-D(t) has five components. Each is modeled correctly as either a stock (finite, depletes
-and accumulates) or a flow (ongoing, but with a saturation ceiling):
+Base scenario results:
+  Peak: 1.112× baseline  (year 4)
+  Break-even: year 5
+  Final: 1.023× baseline  (year 10)
 
-  D(t) = 1 + elasticity_demand(t) + backlog_demand(t)
-           + debt_demand(t) + underserved_demand(t) + induced_demand(t)
+Read as: engineers peak at 11% above baseline by year 4, start declining
+in year 5 as productivity growth overtakes demand growth, end at 2.3%
+above baseline in year 10.
 
-All five components are subject to an aggregate ceiling so D(t) cannot grow without bound.
+The break-even year is the most decision-relevant single number. It answers:
+how long does the window of rising engineer employment last?
 
-### 3.2 Backlog: Dynamic Stock with Equilibrium (KEY CORRECTION FROM v3)
+---
 
-**What was wrong in v3:** Backlog was treated as a one-time stock that depleted
-to zero by year 5. This was wrong in two ways:
-  1. Backlog never goes to zero — organizations always generate new work faster
-     than they can complete it; some backlog is structurally permanent
-  2. Backlog accumulates continuously — as the business grows and as agentic tools
-     open new possibilities, new work enters the backlog faster
+## 4. Productivity Model (V5: Three-Component Alpha)
 
-**How v4 models it:**
+### 4.1 Components
 
-The backlog is a stock B(t) with explicit inflows and outflows:
+  g_productivity(t) = tool_gain(t) + routine_gain(t) + cognitive_gain(t)
+                    - verification_drag(t) - debt_drag(t)
+
+#### Tool improvement gain
+  = [(1 + g_tools)^t / (1 + g_tools)^(t-1) - 1] x adoption_fraction
+  ≈ g_tools × adoption_fraction
+
+  g_tools = 0.20 (20%/yr capability improvement). NO EMPIRICAL BASIS.
+  This is the single most impactful uncalibrated parameter.
+
+#### Routine task gain (V4 component)
+  maturity = min(1.0, t / alpha_maturation_years)
+  alpha(t) = (1 - maturity) × alpha_experienced + maturity × alpha_routine
+  f_auto(t) = min(0.70, f_auto × (1 + 0.04 × t))
+  routine_gain = (f_auto(t) × alpha(t) - verification_drag) × adoption
+
+  alpha_experienced = -0.19  MEDIUM confidence: METR RCT (Becker et al. 2025,
+    arXiv 2507.09089). 16 developers, 246 tasks. Tools SLOWED experienced devs.
+  alpha_routine = +0.20  LOW-MEDIUM: BIS field experiment, Copilot studies.
+  alpha_maturation_years = 5.0  LOW confidence: structural assumption.
+  f_auto = 0.35  MEDIUM: McKinsey 2023, Stack Overflow 2024 (N=65,437).
+
+  The blend shifts from the METR drag regime to routine gains over 5 years.
+  This produces low productivity growth early (1-3%/yr in years 1-3)
+  rising steeply as tools mature and adoption compounds (18-20%/yr by year 10).
+
+#### Cognitive task gain (V5 addition)
+  cognitive_scope(t) = cognitive_scope_max × (1 - exp(-cognitive_growth_rate × t))
+  cognitive_alpha(t) = alpha_cognitive × min(1.0, t / cognitive_maturation_years)
+  cognitive_gain = f_cognitive × cognitive_scope(t) × cognitive_alpha(t) × adoption
+
+  alpha_cognitive = 0.15   NO EMPIRICAL BASIS
+  cognitive_scope_max = 0.30   NO EMPIRICAL BASIS (conservative ceiling)
+  cognitive_growth_rate = 0.15   NO EMPIRICAL BASIS
+  cognitive_maturation_years = 8.0   NO EMPIRICAL BASIS
+  f_cognitive = 0.35   NO EMPIRICAL BASIS (estimated from task time studies)
+
+  Four cognitive capabilities being modeled:
+    Specification and decomposition (breaking problems into pieces)
+    Context synthesis across large codebases
+    Debugging hypothesis generation
+    Requirements formalization
+
+  Setting cognitive_scope_max = 0.0 reproduces V4 exactly (scenario: cognitive_off).
+
+### 4.2 Why Productivity Is Low Early
+
+In year 1: adoption = 17.5%, maturity = 0.20, alpha ≈ -0.11 (mostly METR drag)
+  tool_gain = 0.20 × 0.175 = 3.5%
+  routine_gain ≈ -1.0% (negative because METR drag dominates)
+  cognitive_gain ≈ 0% (tools not yet assisting cognitive work)
+  net g_productivity ≈ 1.3%/yr
+
+In year 10: adoption = 72%, maturity = 1.0, alpha = +0.20 (fully routine)
+  tool_gain = 0.20 × 0.719 = 14.4%
+  routine_gain ≈ 5.4%
+  cognitive_gain ≈ 0.9%
+  net g_productivity ≈ 20%/yr
+
+The jump from 1.3% to 20% over 10 years is driven equally by:
+  (a) adoption growing from 17% to 72%
+  (b) alpha shifting from negative to positive as tools mature
+
+---
+
+## 5. Demand Model (V5 Dynamic Stocks)
+
+All demand components return values in "annual fraction of baseline engineering
+output" — the same unit as g_productivity, making them directly comparable.
+
+### 5.1 Backlog (dynamic stock with Parkinson refill)
 
   B(t+1) = B(t) + inflow(t) - outflow(t)
+  inflow = baseline_inflow + parkinson × productivity_gain × B
+         + agentic_expansion × adoption × B_initial
+  outflow = min(B × completion_rate × (1 + productivity_gain), B - floor)
 
-  inflow(t) = B_baseline_inflow                    # normal business demand
-            + B_parkinson × productivity(t)         # Parkinson's Law: capacity fills
-            + B_agentic_expansion × adoption(t)     # new projects now feasible
+  demand_signal = (outflow - baseline_eq_outflow) / 12
+               = extra work done this year vs no-agentic baseline
 
-  outflow(t) = completion_rate(t)                  # function of engineer productivity
+  parkinson_coefficient = 0.25  (was 0.40 in V4; lowered as more defensible)
+  Parkinson: 25% of freed capacity immediately fills with new scope demands.
+  NO EMPIRICAL BASIS.
 
-  completion_rate(t) = B(t) × (1 + productivity_gain(t)) / B_clearance_halflife
+  Note: demand and productivity both scale with adoption, which is why they
+  track each other closely and the margin stays near zero for many years.
 
-The equilibrium backlog is where inflow = outflow. When productivity rises:
-  - outflow rises (backlog clears faster)
-  - BUT inflow also rises (Parkinson's Law: more capacity → more scope demanded)
-  - The net change in equilibrium backlog is smaller than a naive model suggests
+### 5.2 Technical Debt (dynamic stock with AI premium)
 
-The demand signal from backlog is the excess above equilibrium:
-  backlog_demand(t) = max(0, B(t) - B_equilibrium(t)) / B_baseline
+  TD(t+1) = TD(t) + inflow(t) - repayment(t)
+  inflow = debt_per_unit_output × output × (1 + ai_debt_premium × adoption)
+  demand_signal = refactoring work from repayment (POSITIVE only)
 
-**Floor:** B(t) never falls below `backlog_floor_months` (default 2 months),
-reflecting the structural minimum — organizations always have more ideas than capacity.
+  ai_debt_premium = 0.35  MEDIUM confidence: CMU SEI 2024.
+  AI-generated code creates ~35% more technical debt per line than human code.
 
-**Empirical note:** No direct measurement of backlog equilibrium dynamics exists.
-The Parkinson coefficient is a model assumption. The equilibrium concept is grounded
-in organizational theory but not calibrated to data.
+  initial_pct = 40%  HIGH confidence: McKinsey 2023, SO Survey 2024.
+  Debt affects productivity via debt_drag = TD × 0.0003 per pct-point.
+  At 40% initial debt: 1.2%/yr drag (falls as debt repays).
 
-### 3.3 Technical Debt: Dynamic Stock with AI Premium (KEY CORRECTION FROM v3)
-
-**What was wrong in v3:** Technical debt was treated as a one-time stock that
-depleted and then became a slight negative by year 5. This ignored:
-  1. New debt accumulates continuously with every feature shipped
-  2. AI-generated code creates more debt per line than human-written code
-     (CMU SEI 2024: ~35% more technical debt from AI-assisted code)
-  3. Some debt is structural and never gets addressed
-
-**How v4 models it:**
-
-The debt stock TD(t) evolves as:
-
-  TD(t+1) = TD(t) + debt_inflow(t) - debt_repayment(t)
-
-  debt_inflow(t) = base_inflow_rate × output(t)       # proportional to what's shipped
-                 × (1 + ai_debt_premium × adoption(t)) # AI code is higher debt/line
-                 × (1 - quality_investment_rate)        # some orgs invest in quality
-
-  debt_repayment(t) = TD(t) × repayment_rate(t)
-    where repayment_rate(t) = base_repayment_rate
-                            × (1 + productivity_gain(t) × debt_focus_fraction)
-
-  structural_floor = TD_initial × debt_floor_fraction  # debt that never gets addressed
-
-The demand signal from technical debt is the current maintainability burden:
-  debt_demand(t) = -debt_maintenance_fraction × TD(t)  # negative: debt consumes capacity
-
-**Note:** Technical debt generates NEGATIVE demand in the long run — it consumes
-engineering capacity that could otherwise be used for new features. Near-term,
-addressing debt generates positive demand (refactoring work). Medium-term, clean
-code reduces maintenance burden. The current model correctly captures this arc.
-
-**The AI debt premium is important:** When agentic adoption is high, output grows
-but so does debt inflow. This partially offsets the productivity gain and explains
-why the net employment effect of agentic coding may be smaller than naive productivity
-estimates suggest.
-
-### 3.4 Underserved Markets: Penetration-Depleting Stock (CORRECTION FROM v3)
-
-**What was wrong in v3:** The underserved market activated past a cost threshold
-and kept generating demand indefinitely. The market never depleted as it got served.
-
-**How v4 models it:**
-
-The underserved market is a finite stock U(t) that depletes as it gets penetrated:
+### 5.3 Underserved Markets (depleting stock)
 
   U(t+1) = U(t) - penetration(t)
+  penetration = U(t) × 0.12 × activation(t)
+  activation = min(1, (cum_cost_reduction - 0.40) / 0.40)
 
-  penetration(t) = U(t) × penetration_rate(t)
+  Only activates after 40% cumulative cost reduction (≈ year 5 at base rate).
+  Then depletes at 12%/yr of remaining stock.
 
-  penetration_rate(t) = 0                           if cost_reduction < threshold
-                      = base_penetration_rate        if cost_reduction >= threshold
-                        × activation(t)              # ramp in as cost falls further
+  underserved_fraction = 0.25  NO EMPIRICAL BASIS.
+  threshold = 0.40  NO EMPIRICAL BASIS.
 
-  activation(t) = min(1, (cost_reduction - threshold) / threshold)
+### 5.4 Induced Demand (finite Bass diffusion)
 
-The demand signal is the flow of newly penetrated market:
-  underserved_demand(t) = penetration(t) / U_initial
+  New software categories that don't currently exist. Finite total size.
+  Follows Bass diffusion (p=0.02, q=0.30, start_year=3).
+  Total size = induced_market_size = 0.20  NO EMPIRICAL BASIS.
 
-As U(t) → 0, this demand source exhausts. The total cumulative demand from
-underserved markets is bounded by U_initial (the initial underserved fraction).
+### 5.5 Price Elasticity (cumulative cap)
 
-### 3.5 Induced Demand: Bass Diffusion on New Categories (CORRECTION FROM v3)
+  expansion = weighted_elasticity × annual_price_reduction
+  Weighted: consumer=1.80, SMB=1.40, enterprise=0.45, regulated=0.20.
+  Cumulative cap: max_cumulative_expansion = 0.60 (Baumol constraint).
 
-**What was wrong in v3:** Induced demand (new software categories that don't yet
-exist) grew via an S-curve on the annual rate, but the cumulative stock kept
-growing without a ceiling. There was no total size on the new market created.
+  MEDIUM confidence on elasticity values: industry pricing research.
 
-**How v4 models it:**
+### 5.6 Aggregate Ceiling
 
-Induced demand is modeled as a new market that itself follows Bass diffusion:
-
-  The total size of new categories created = induced_market_size (parameter)
-  The penetration of those new categories follows: F(t) = Bass(p_induced, q_induced, t)
-
-  induced_demand(t) = induced_market_size × F(t)    # level of new market demand
-
-The annual demand signal is the first difference:
-  induced_flow(t) = induced_demand(t) - induced_demand(t-1)   # growth rate
-
-This correctly models induced demand as: new categories appear (slowly at first,
-then rapidly, then tapering) and eventually reach their own market saturation.
-The total lifetime demand from induced effects is bounded.
-
-### 3.6 Price Elasticity: Cumulative Cap (CORRECTION FROM v3)
-
-The elasticity-driven demand expansion has a cumulative ceiling:
-
-  elasticity_demand_cumulative(t) = min(
-      cumulative_elasticity_demand(t),
-      max_market_expansion × baseline_D   # hard ceiling: market can at most N× baseline
-  )
-
-  max_market_expansion = 2.0 (default): software market can at most double from agentic
-  effects above baseline growth. This reflects the Baumol constraint: as software gets
-  cheaper, other inputs (PM, design, sales, CS) become the binding constraint.
-
-### 3.7 Aggregate Demand Ceiling
-
-After summing all components, a logistic saturation is applied:
-
-  D_saturated(t) = D_max / (1 + exp(-k × (D_raw(t) - D_inflection)))
-
-where D_max is the maximum plausible demand ratio (default 3.0: demand triples at most),
-and k controls the steepness of saturation.
-
-This prevents the physically impossible case of demand growing without bound as
-costs approach zero.
+  D_saturated = D_max × tanh(D_raw / D_max), D_max = 3.0
+  Annual demand capped at D_max × 0.20 per year.
 
 ---
 
-## 4. Productivity Model
+## 6. Technology Adoption: Bass Diffusion
 
-### 4.1 Total Factor Productivity
+  F(t) = (1 - e^(-(p+q)t)) / (1 + (q/p) × e^(-(p+q)t))
 
-A(t) captures how much software one engineer can produce, modulated by:
-  - Tool capability at time t (grows at g_tools per year)
-  - Adoption fraction F_adoption(t) from Bass diffusion
-  - Task composition: what fraction of tasks are automatable
-  - Verification overhead: the cost of reviewing AI-generated output
-  - Debt drag: accumulated technical debt slows productivity regardless of tools
+  p = 0.03, q = 0.38, initial_adoption = 0.15, max_adoption = 0.85
 
-  A(t) = A_baseline × (1 + net_gain(t) × F_adoption(t))
+  LOW confidence: fitted approximately to GitHub Copilot adoption 2021-2024.
 
-  net_gain(t) = f_auto(t) × alpha(t)                    # automation gain
-              - f_verify × f_auto(t) × verification_drag # verification drag
-              - debt_drag(t)                             # debt maintenance burden
-
-  alpha(t) = blend of alpha_experienced (METR: -0.19) and alpha_routine (+0.20)
-             weighted by tool maturity: matures from experienced-dev context
-             toward routine-task gains over 5 years
-
-  debt_drag(t) = TD(t) × debt_productivity_drag_rate     # debt slows everyone
-
-### 4.2 Technology Adoption: Bass Diffusion
-
-The fraction of engineers using mature agentic tools follows:
-
-  F_adoption(t) = Bass(p=0.03, q=0.38, initial=0.15, max=0.85)
-
-Key insight: productivity effects are muted in early years because most engineers
-haven't adopted tools yet, even if the tools are capable. The adoption curve drives
-the timing of productivity effects more than the raw capability does.
+  Adoption is the common multiplier on both demand and productivity.
+  When adoption doubles (17%→72% over 10 years), both sides roughly double.
+  This co-movement keeps the margin small and the race close.
 
 ---
 
-## 5. Exogenous Multiplier
+## 7. Break-Even Sensitivity Analysis
 
-Four factors outside the structural model are bundled into a single composite:
+Run with:
+  python run.py --breakeven-sensitivity
+  python run.py --crossplot
 
-  E = geometric_mean(gdp^w1, immigration^w2, education^w3, regulation^w4)
+Cross-plot: break-even year as f(g_tools, parkinson_coefficient)
 
-  Weights: gdp=0.35, immigration=0.25, education=0.20, regulation=0.20
+  g_tools \ parkinson   0.15   0.25*  0.35   0.45
+  g_tools=0.10         never  never  never  never
+  g_tools=0.15          yr9   never  never  never
+  g_tools=0.20*         yr4    yr5    yr8   never
+  g_tools=0.25          yr4    yr4    yr4    yr4
+  g_tools=0.30          yr3    yr4    yr4    yr4
+  g_tools=0.35          yr3    yr3    yr3    yr3
+
+  * = base parameters
+
+Full uncertainty range: break-even year spans 3 to "never within 10 years."
+The model is appropriately agnostic. It identifies what to watch, not what
+will happen. Neither g_tools nor parkinson_coefficient has empirical basis.
+
+---
+
+## 8. Exogenous Multiplier
+
+  E = geometric_mean(gdp^0.35, immigration^0.25, education^0.20, regulation^0.20)
   Scale: [0.5, 2.0], centered on 1.0
+  Applied to net employment delta: I_final = 1 + (I_structural - 1) × E
 
-  Applied to net employment delta: I_final(t) = 1 + (I_structural(t) - 1) × E
-
-Geometric mean is used because these are multiplicative effects. A 50% boost from
-favorable immigration and a 50% drag from restrictive regulation should roughly cancel —
-geometric mean captures this (1.5 × 0.67 ≈ 1.0); arithmetic mean would not.
+  Geometric mean: a 50% immigration boost and 50% regulatory drag cancel.
+  HIGH confidence for GDP sub-component (IMF data). LOW for all others.
 
 ---
 
-## 6. Firm Model: Three-Way Management Fork + IMPROVE Branch
+## 9. Firm Model
 
-### 6.1 The Four Strategies
+### 9.1 Four-Way Management Fork
 
-When agentic coding raises engineer productivity, management chooses among:
+  HARVEST:  Reduce headcount. Same output, better margin.
+  REINVEST: Flat headcount. More output, grow revenue.
+  EXPAND:   Grow headcount. New projects newly viable at lower cost.
+  IMPROVE:  Flat headcount. Use gains for quality/debt (V4 addition).
 
-  HARVEST:  Reduce headcount, maintain output, capture efficiency as margin
-  REINVEST: Maintain headcount, produce more/better software, grow revenue
-  EXPAND:   Increase headcount, pursue projects previously not viable at old cost
-  IMPROVE:  Maintain headcount, raise quality rather than quantity (NEW IN V4)
+Fork is classified from observable firm characteristics. Most firms blend.
+IMPROVE is driven by: high technical debt (>45%), regulated industry, active
+legacy modernization, high current market penetration.
 
-Most firms blend these strategies. The model classifies the primary strategy
-from observable firm characteristics and allows weighted blends.
+### 9.2 Dynamic Firm Backlog (V5 fix — most important firm model change)
 
-### 6.2 Fork Classification Logic
+PREVIOUS (V4): static permanent boost
+  backlog_boost = min(0.40, backlog_months/30)  [never changed]
 
-Observable inputs from firm profile drive fork classification:
+V5 FIX: FirmBacklogStock with depletion and Parkinson refill
+  B(t+1) = B(t) - net_clearance(t)
+  net_clearance = completion × (1 - firm_parkinson)
+  completion = B × 1.5 × (1 + productivity_gain)
+  demand_factor = max(0, B/B_initial - floor/B_initial)  [fades to 0]
+  backlog_boost = min(0.40, demand_factor × 0.40)
 
-  HARVEST score ↑ when:
-    software_is_core_product = False (cost center)
-    competitive_intensity = low
-    capital_efficiency_pressure = high
-    backlog_months < 3 (no pent-up demand)
-    will_pass_savings_to_customers = False + low competition
+Firm-specific Parkinson coefficients (industry defaults, NO EMPIRICAL BASIS):
+  consumer_tech: 0.45  enterprise_saas: 0.30  fintech: 0.20
+  healthcare: 0.15  manufacturing: 0.15  government: 0.10
 
-  REINVEST score ↑ when:
-    software_is_core_product = True
-    competitive_intensity = medium
-    backlog_months 3-9
+Impact: a consumer startup with 18 months of backlog now grows from 50 to
+62 engineers (not 142 as in V4). The backlog demand fades by year 5 as
+it is worked through, and only the Parkinson refill rate sustains ongoing demand.
 
-  EXPAND score ↑ when:
-    will_pass_savings_to_customers = True
-    competitive_intensity = high
-    backlog_months > 9
-    revenue_growth_rate > 0.20
+Optional profile field: firm_parkinson_override to set a specific value.
 
-  IMPROVE score ↑ when (NEW IN V4):
-    technical_debt_pct > 45 (high debt: quality investment has high ROI)
-    industry in [healthcare, fintech, regulated] (quality constraints dominate)
-    has_legacy_modernization = True (already in quality-improvement mode)
-    current_market_penetration > 0.30 (mature product: users want quality, not features)
+### 9.3 Revenue Saturation (V4, maintained in V5)
 
-### 6.3 Revenue Saturation (CORRECTION FROM v3)
+  g(t) = long_run_rate + (initial_rate - long_run_rate) × exp(-λ × t × penetration)
 
-v3's EXPAND branch let revenue growth compound indefinitely. v4 replaces this with
-a logistic saturation tied to market penetration:
-
-  growth_rate(t) = long_run_growth_rate
-                 + (initial_growth_rate - long_run_growth_rate)
-                   × exp(-saturation_rate × t × current_market_penetration)
-
-where:
-  long_run_growth_rate = max(gdp_growth, industry_baseline)  # e.g., 0.06
-  saturation_rate      = function of market_penetration_rate
-  current_market_penetration = fraction of TAM already captured (firm profile input)
-
-High penetration → fast decay toward long-run rate.
+High current_market_penetration → fast decay toward long-run growth rate.
 Low penetration → slow decay; high growth persists longer.
 
-### 6.4 Organizational Absorption Cap (NEW IN V4)
+Required new profile fields: long_run_growth_rate, current_market_penetration.
 
-Engineering organizations cannot hire and productively onboard arbitrarily fast:
-  - New engineers take 3-6 months to become productive
-  - Code review bandwidth limits how fast new contributors can ship
-  - Coordination overhead (Brooks' Law) grows superlinearly
+### 9.4 Organizational Absorption Cap
 
-v4 caps the year-on-year headcount growth from EXPAND at 35%:
-  headcount_growth(t) = min(uncapped_growth(t), 0.35)
+  headcount_growth(t) = min(uncapped_growth(t), prev_index × 1.35)
 
-This is the most conservative parameter in the firm model. It reflects the
-observed fact that even well-funded, fast-growing engineering organizations
-rarely sustain >30-35% headcount growth for multiple consecutive years.
+Maximum 35%/yr headcount growth from EXPAND strategy. Engineering orgs cannot
+hire and productively onboard faster (onboarding time, code review bandwidth,
+coordination overhead).
 
-### 6.5 IMPROVE Branch Headcount Implications (NEW IN V4)
+### 9.5 Cognitive Leverage in Tier Adjustments (V5)
 
-IMPROVE means productivity gains are absorbed into quality, not quantity:
-  - No headcount reduction (unlike HARVEST)
-  - No output quantity increase (unlike REINVEST)
-  - Headcount stays approximately flat, with slight growth for senior engineers
-    needed to architect quality improvements
+  tier_index = base_index × (1 + (leverage - 1) × cognitive_scope)
 
-  h_improve(t) = 1.0 + 0.05 × min(1.0, t/5.0)   # slight senior growth
+  leverage factors (NO EMPIRICAL BASIS):
+    architect: 1.60  senior: 1.40  mid: 1.10  junior: 0.70
 
-IMPROVE is important because it explains a real-world phenomenon the other branches
-miss: many firms will neither cut engineers nor grow them — they'll use the productivity
-gain to finally fix things they've deferred. The model should be able to represent this.
+Junior leverage < 1.0 is the key V5 insight: cognitive tools require domain
+expertise to direct. A junior engineer doesn't yet know what architectural
+question to ask. Cognitive tools widen the gap between senior and junior
+employment, not narrow it.
 
-### 6.6 Technical Debt Feedback in Firm Model
-
-The firm's technical_debt_pct evolves using the same stock-and-flow logic as the
-market model. This means:
-  - HARVEST firms accumulate debt faster (output maintained with fewer, more-rushed engineers)
-  - EXPAND firms accumulate debt faster (shipping speed increases)
-  - IMPROVE firms reduce debt (deliberate quality investment)
-  - REINVEST firms are neutral on debt
-
-The debt level feeds back into productivity: high-debt firms see lower effective
-productivity gains because engineers spend more time on maintenance.
+At cognitive_scope = 0: reverts exactly to V4 tier adjustments.
 
 ---
 
-## 7. Parameters, Confidence, and What Cannot Be Known
+## 10. Empirical Confidence Summary
 
-### 7.1 Well-Calibrated Parameters (use with confidence)
+HIGH confidence:
+  tech_debt_initial_pct = 0.40  (McKinsey 2023; SO Survey 2024 N=65,437)
+  market growth baseline = 8%/yr  (BLS Nov 2025)
 
-| Parameter | Value | Source | Confidence |
-|---|---|---|---|
-| tech_debt_fraction | 0.40 | McKinsey 2023; SO 2024 N=65,437 | HIGH |
-| alpha_experienced | -0.19 | METR RCT, Becker et al. 2025 | MEDIUM |
-| market_growth_baseline | 0.08 | BLS Nov 2025 | HIGH |
-| price_elasticity (enterprise) | 0.45 | Industry pricing research | MEDIUM |
-| price_elasticity (consumer) | 1.80 | Industry pricing research | MEDIUM |
-| Bass q (imitation) | 0.38 | Fitted to Copilot 2021-2024 | LOW |
+MEDIUM confidence:
+  alpha_experienced = -0.19  (METR RCT 2025; N=16, specific context)
+  f_auto = 0.35  (McKinsey 2023; SO Survey 2024)
+  price_elasticity by segment  (industry pricing research)
+  ai_debt_premium = 0.35  (CMU SEI 2024)
+  Bass q = 0.38  (fitted to Copilot 2021-2024)
 
-### 7.2 Parameters With No Empirical Basis
+LOW confidence:
+  alpha_routine = 0.20  (non-RCT studies)
+  alpha_maturation_years = 5.0  (structural assumption)
+  backlog_initial_months = 6.0  (proxy from sprint data)
+  consumer_capture_rate  (IO theory applied to software)
 
-These must be varied in sensitivity analysis. Results that depend heavily on these
-should not be treated as reliable:
-
-  g_tools (tool improvement rate), f_verify (verification overhead),
-  underserved_fraction, induced_market_size, annual_cost_reduction_rate,
-  phi (production function elasticity), B_parkinson (Parkinson coefficient),
-  debt_ai_premium, max_market_expansion
-
-### 7.3 The Fundamental Limit of This Model
-
-The pivotal variable that determines whether Jevons holds or fails is:
-
-  What fraction of productivity gains do firms reinvest in more software
-  vs. harvest as cost reduction?
-
-This is a management behavior question. It varies by firm, competitive environment,
-capital markets pressure, and strategic posture. No dataset captures it. The model
-represents it through the fork classification, but the fork itself is a hypothesis
-about management intent derived from observable characteristics — not a measurement.
+NO EMPIRICAL BASIS (must be varied in sensitivity analysis):
+  g_tools = 0.20                    Most impactful uncalibrated parameter
+  parkinson_coefficient = 0.25      Second most impactful
+  f_verify = 0.25
+  annual_cost_reduction_rate = 0.12
+  phi = 0.85
+  underserved_fraction = 0.25
+  induced_market_size = 0.20
+  alpha_cognitive = 0.15            V5 cognitive
+  cognitive_scope_max = 0.30        V5 cognitive
+  cognitive_growth_rate = 0.15      V5 cognitive
+  cognitive_maturation_years = 8.0  V5 cognitive
+  firm Parkinson coefficients       Judgment-based industry defaults
 
 ---
 
-## 8. What the Model Cannot Do
+## 11. What the Model Cannot Do
 
-1. Predict aggregate employment precisely — too many uncalibrated parameters
-2. Model transition frictions — hiring/firing lags, skill development time
-3. Account for structural breaks — sudden AI capability discontinuities
-4. Separate AI effects from macroeconomic cycle in near-term data
-5. Determine which fork a specific firm will choose — this requires knowing
-   management intent, which is not derivable from observable characteristics alone
-6. Model international trade in software or cross-border labor flows in detail
+1. Predict aggregate employment precisely — too many uncalibrated parameters.
+2. Model transition frictions — hiring lags, reskilling time, supply response.
+3. Separate AI effects from macroeconomic cycle effects in near-term data.
+4. Account for structural breaks — capability discontinuities, regulatory shocks.
+5. Determine which fork a specific firm will take — fork is a hypothesis,
+   not a measurement of management intent.
+6. Validate the cognitive component — no empirical basis exists for V5's
+   alpha_cognitive, scope_max, growth_rate. Run cognitive_off to test sensitivity.
 
 ---
 
-## 9. Historical Analogies and What They Suggest
+## 12. Version History
 
-Four historical cases where productivity-enhancing technology hit knowledge work:
-
-CAD in mechanical engineering (1970-1990):
-  Productivity gain: 3-10x on drafting. Employment: net INCREASE.
-  Why: Lower iteration cost unlocked qualitatively new design possibilities.
-  Lesson: When tools enable genuinely new work, Jevons holds.
-
-Spreadsheets in accounting (1980-1990):
-  Productivity gain: 5-10x on calculation. Employment: net FLAT.
-  Why: More complex analysis became feasible; compliance demands grew.
-  Lesson: Task expansion can absorb large productivity gains.
-
-ATMs in banking (1970-2000):
-  Productivity gain: significant per-branch cost reduction. Employment: net INCREASE in tellers.
-  Why: Lower branch cost → more branches → more tellers (distribution effect).
-  Lesson: Cost reduction can expand the distribution channel, growing total employment.
-
-Word processing in secretarial work (1970-1990):
-  Productivity gain: large on document production. Employment: net SHARP DECLINE.
-  Why: Managers did their own typing; no demand expansion pathway.
-  Lesson: When there is no demand expansion pathway and the task is routine, substitution wins.
-
-Software engineering resembles CAD and spreadsheets more than word processing:
-  - There is a large demand expansion pathway (backlog, underserved markets, new categories)
-  - The work is not purely routine (architecture, requirements, judgment are hard to automate)
-  - The tools open new possibilities (products that were too expensive to build before)
-
-This suggests Jevons is more likely to hold for software engineering than fail —
-but the historical analogies also show that demand expansion is not guaranteed,
-and the v4 saturation mechanisms correctly prevent the model from assuming it is.
+V1: System dynamics — compounding effects producing nonsensical results (55× index).
+V2: Structural decomposition + Jevons condition. Empirical calibration doc.
+    Exogenous multiplier. Firm model with heuristic multipliers.
+V3: Break-even analysis as primary output. Bass diffusion. Three-way fork.
+V4: Dynamic demand stocks. Underserved markets deplete. Induced demand bounded.
+    Aggregate ceiling. Revenue saturation. IMPROVE fork. Absorption cap (35%/yr).
+V5: Three-component alpha (cognitive). Cognitive scope expansion. Cognitive
+    leverage by tier. Parkinson 0.40→0.25. alpha_maturation_years parameterized.
+    Break-even sensitivity analysis + cross-plot. FirmBacklogStock (depletion +
+    Parkinson refill). Firm-specific Parkinson by industry.

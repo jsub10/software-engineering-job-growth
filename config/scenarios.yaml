@@ -82,3 +82,61 @@ scenarios:
       demand:
         backlog_initial_months: 3.0
         underserved_fraction: 0.05
+
+  # V5 cognitive scenarios
+  cognitive_conservative:
+    description: "V5 cognitive tools with conservative assumptions. 30% scope max, slow growth."
+    overrides:
+      cognitive:
+        alpha_cognitive: 0.10
+        cognitive_scope_max: 0.20
+        cognitive_growth_rate: 0.10
+        cognitive_maturation_years: 10.0
+
+  cognitive_optimistic:
+    description: "V5 cognitive tools with optimistic assumptions. 50% scope max, faster growth."
+    overrides:
+      cognitive:
+        alpha_cognitive: 0.25
+        cognitive_scope_max: 0.50
+        cognitive_growth_rate: 0.25
+        cognitive_maturation_years: 6.0
+
+  cognitive_off:
+    description: "V5 with cognitive tools disabled. Reproduces v4 base exactly."
+    overrides:
+      cognitive:
+        alpha_cognitive: 0.0
+        cognitive_scope_max: 0.0
+        cognitive_growth_rate: 0.0
+
+  # Break-even sensitivity scenarios (explicit parameter variants)
+  fast_tools:
+    description: "g_tools=0.35: aggressive tool improvement. Break-even arrives year 3-4."
+    overrides:
+      labor: {g_tools: 0.35}
+
+  slow_tools:
+    description: "g_tools=0.10: slow tool improvement. Employment may never decline in 10yr."
+    overrides:
+      labor: {g_tools: 0.10}
+
+  low_parkinson:
+    description: "parkinson=0.10: weak Parkinson effect. Demand exhausts sooner, earlier break-even."
+    overrides:
+      demand: {parkinson_coefficient: 0.10}
+
+  high_parkinson:
+    description: "parkinson=0.45: strong Parkinson effect. Demand persists, later break-even."
+    overrides:
+      demand: {parkinson_coefficient: 0.45}
+
+  fast_maturation:
+    description: "alpha matures in 3yr: tools overcome METR drag sooner, earlier break-even."
+    overrides:
+      labor: {alpha_maturation_years: 3.0}
+
+  slow_maturation:
+    description: "alpha matures in 8yr: METR drag persists longer, very late break-even."
+    overrides:
+      labor: {alpha_maturation_years: 8.0}

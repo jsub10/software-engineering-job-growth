@@ -31,7 +31,7 @@ demand:
   max_cumulative_expansion: 0.60
   backlog_initial_months: 6.0
   backlog_inflow_rate: 1.0
-  parkinson_coefficient: 0.40
+  parkinson_coefficient: 0.25  # was 0.40; lowered — organizations do cap scope
   agentic_expansion_rate: 0.10
   backlog_completion_rate: 2.0
   backlog_floor_months: 2.0
@@ -73,3 +73,24 @@ exogenous:
   immigration_policy: 1.0
   education_supply: 1.0
   regulatory_environment: 1.0
+
+# V5: Cognitive capability parameters (all NO EMPIRICAL BASIS)
+cognitive:
+  # Effect on cognitive tasks when AI-assisted
+  # Grows from 0 toward this ceiling as tools mature over cognitive_maturation_years
+  alpha_cognitive: 0.15
+
+  # Fraction of engineering time currently spent on cognitive tasks
+  # (architecture, debugging, requirements, specification, decomposition)
+  # Senior: ~55-70%. Junior: ~15%. Aggregate estimate: ~35%.
+  f_cognitive: 0.35
+
+  # Max fraction of cognitive work that becomes AI-assisted (ceiling)
+  # Conservative: 0.30 means AI never assists more than 30% of cognitive work
+  cognitive_scope_max: 0.30
+
+  # Annual rate of cognitive scope expansion
+  cognitive_growth_rate: 0.15
+
+  # Years for cognitive alpha to reach full maturity
+  cognitive_maturation_years: 8.0

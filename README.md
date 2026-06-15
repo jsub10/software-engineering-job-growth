@@ -1,68 +1,86 @@
-# Agentic Coding Labor Model v4
+# Agentic Coding Labor Model v5
 
-Two explanations are provided:
-- `docs/model_explanation_detailed.md` — full technical explanation for researchers and analysts
-- `docs/model_explanation_simple.md` — plain-language explanation for sharing with others
+## The New Question V5 Answers
 
-## What's New in v4
+V4 modeled agentic coding as automating a fixed fraction of engineering *tasks*
+(routine code, testing, documentation). V5 adds a fundamentally different mechanism:
+cognitive capability replication.
 
-Four structural corrections to the demand model plus three firm model corrections:
+Agentic tools are beginning to assist with four types of cognitive work that
+previous versions treated as permanently human:
 
-**Backlog: dynamic stock with equilibrium**
-Backlog never exhausts to zero. It has ongoing inflows (new work, Parkinson's Law,
-agentic expansion of feasible projects) and outflows (completion). The equilibrium
-backlog settles where inflow = outflow; productivity gains shift equilibrium downward
-but Parkinson's Law partially offsets this.
+  - Specification and decomposition: breaking problems into solvable pieces
+  - Context synthesis: understanding large codebases before changing them
+  - Debugging hypothesis generation: reasoning about what could be wrong
+  - Requirements formalization: turning vague needs into precise specifications
 
-**Technical debt: dynamic stock with AI premium**
-Debt accumulates with every feature shipped, and AI-generated code creates ~35% more
-debt per line (CMU SEI 2024). Debt feeds back into productivity as a drag. The IMPROVE
-fork in the firm model uses extra debt focus to deliberately pay it down.
+This changes the model's predictions in a specific way: productivity grows faster
+and to a higher ceiling, but the *distribution* of that productivity gain across
+the engineering skill pyramid becomes more skewed. Senior engineers who already
+know what architectural question to ask get dramatically more leverage from cognitive
+AI. Junior engineers — who don't yet have the domain expertise to direct cognitive AI
+effectively — see less benefit from cognitive tools than from routine automation tools.
 
-**Underserved markets: depleting penetration stock**
-Once unlocked by sufficient cost reduction, the underserved market depletes as it is
-penetrated. Demand from this source exhausts rather than growing indefinitely.
-
-**Induced demand: finite Bass diffusion**
-New software categories have a total size (parameter). They emerge via Bass diffusion,
-reach peak penetration, and stabilize. Total lifetime induced demand is bounded.
-
-**Aggregate demand ceiling**
-After all components are summed, a smooth tanh ceiling prevents demand from exceeding
-3x baseline — reflecting the Baumol constraint that complements become binding.
-
-**Firm model: revenue saturation**
-Revenue growth decays logistically from its current rate toward a long-run rate,
-governed by current_market_penetration. High penetration → fast decay.
-
-**Firm model: organizational absorption cap**
-EXPAND strategy capped at 35% annual headcount growth — engineering organizations
-cannot hire and productively onboard faster than this.
-
-**Firm model: IMPROVE branch**
-Fourth fork. Firms use productivity gains for quality rather than quantity.
-Driven by high technical debt, regulated industries, legacy modernization, high penetration.
-
-## Project Structure
+## Primary Output: Three Numbers
 
 ```
-agentic-labor-model-v4/
+Peak employment:   1.150× baseline  (year 8)
+Break-even year:   year 9            (first year employment starts declining)
+Final employment:  1.143× baseline  (year 10)
+```
+
+Read as: under base assumptions, employment rises 15% above baseline by year 8,
+then starts declining. By year 10, still 14% above baseline. The trajectory matters
+more than any single number.
+
+## V5 vs V4 Comparison
+
+| Scenario              | Peak | Peak Yr | Break-Even | Final |
+|---|---|---|---|---|
+| cognitive_off (= v4)  | 1.174 | 10 | never | 1.174 |
+| cognitive_conservative | 1.166 | 9 | yr 10 | 1.164 |
+| base (v5 default)     | 1.150 | 8 | yr 9  | 1.143 |
+| cognitive_optimistic  | 1.116 | 4 | yr 5  | 1.059 |
+
+More cognitive capability → earlier peak → earlier decline. The break-even year
+is the key indicator to watch in practice.
+
+## Tier Effects
+
+The widening skill pyramid is V5's most important structural prediction:
+
+| Scenario | Junior | Mid | Senior | Architect (relative) |
+|---|---|---|---|---|
+| cognitive_off | 0.962 | 1.127 | 1.432 | — |
+| base (v5) | 0.872 | 1.123 | 1.524 | higher |
+| cognitive_optimistic | 0.749 | 1.063 | 1.529 | highest |
+
+Junior employment falls as cognitive tools become more capable — not because
+junior engineers are displaced by routine automation (that's already in v4),
+but because cognitive tools require expertise to direct, and juniors lack that
+expertise. The skill premium for senior engineers grows with cognitive tool capability.
+
+## Architecture
+
+```
+agentic-labor-model-v5/
 ├── README.md
+├── CLAUDE.md                         ← Claude Code instructions
 ├── requirements.txt
 ├── run.py
-├── CLAUDE.md                         ← Claude Code instructions
 ├── docs/
-│   ├── model_explanation_detailed.md ← Full technical explanation
-│   └── model_explanation_simple.md  ← Plain-language explanation for sharing
+│   ├── v5_cognitive_additions.md     ← Why and how cognitive components work
+│   ├── model_explanation_detailed.md
+│   └── model_explanation_simple.md
 ├── config/
-│   ├── market_params.yaml
-│   └── scenarios.yaml
+│   ├── market_params.yaml            ← Now includes [cognitive] section
+│   └── scenarios.yaml                ← Now includes cognitive scenarios
 ├── market_model/
 │   ├── core/
-│   │   ├── breakeven.py              ← Primary output: break-even analysis
-│   │   ├── demand_stocks.py          ← Dynamic backlog + tech debt stocks (v4 core)
-│   │   ├── demand_saturation.py      ← Underserved, induced demand, ceiling (v4 core)
-│   │   ├── model.py
+│   │   ├── breakeven.py              ← Three-component alpha + cognitive scope
+│   │   ├── demand_stocks.py
+│   │   ├── demand_saturation.py
+│   │   ├── model.py                  ← Cognitive leverage in tier adjustments
 │   │   ├── exogenous.py
 │   │   ├── scenario_runner.py
 │   │   └── uncertainty.py
@@ -70,54 +88,58 @@ agentic-labor-model-v4/
 │       └── bass.py
 ├── firm_model/
 │   ├── core/
-│   │   └── firm_model.py             ← Four-way fork with v4 corrections
+│   │   └── firm_model.py             ← Cognitive leverage in _tier_adjustments
 │   └── profiles/
 │       ├── enterprise_saas.yaml
 │       ├── regulated_bank.yaml
 │       ├── consumer_startup.yaml
 │       └── manufacturing_it.yaml
-├── output/
-│   ├── charts.py
-│   ├── tables.py
-│   └── reports.py
 └── tests/
-    └── test_v4.py                    ← 31 tests
+    └── test_v4.py                    ← 40 tests (31 v4 + 9 cognitive)
 ```
 
 ## Quickstart
 
 ```bash
 pip install -r requirements.txt
-python run.py                                      # base scenario
-python run.py --scenarios all                      # all 8 scenarios
-python run.py --scenario base --exogenous ai_boom
-python run.py --sensitivity labor.g_tools          # sensitivity analysis
+python run.py                                     # base with v5 cognitive
+python run.py --scenarios all                     # all 11 scenarios
+python run.py --scenario cognitive_optimistic     # aggressive cognitive
+python run.py --scenario cognitive_off            # v4 behavior exactly
+python run.py --firm-compare                      # all firm profiles
 python run.py --monte-carlo --iterations 1000
-python run.py --scenarios all --output all         # save charts + tables + report
-python run.py --firm firm_model/profiles/enterprise_saas.yaml
-python run.py --firm-compare
-python -m pytest tests/ -v
+python -m pytest tests/ -v                        # 40 tests
 ```
 
-## Key Model Insight from v4
+## Empirical Confidence
 
-The base scenario now shows:
-- Years 1-5: Jevons HOLDS (demand > productivity)
-  - Backlog release and tech debt remediation front-load demand
-  - Adoption still ramping; productivity muted early
-- Years 6-10: Jevons FAILS (productivity > demand)
-  - Backlog reaches new equilibrium; demand normalizes
-  - Adoption reaches critical mass; productivity compounds
+The cognitive additions are all NO EMPIRICAL BASIS:
 
-**The near term looks better for engineers than the long term.**
-This is the most important structural prediction from v4, and it only
-emerges because backlog and debt are modeled as dynamic stocks, not
-one-time releases.
+| Parameter | Default | Confidence |
+|---|---|---|
+| alpha_cognitive | 0.15 | NONE — no studies |
+| f_cognitive | 0.35 | NONE — estimated |
+| cognitive_scope_max | 0.30 | NONE — assumption |
+| cognitive_growth_rate | 0.15 | NONE — assumption |
+| cognitive_maturation_years | 8.0 | NONE — assumption |
 
-## New v4 Firm Profile Fields
+Set `cognitive_scope_max: 0` to reproduce v4 exactly and test sensitivity
+to the cognitive assumptions.
 
-Two new required fields:
-  `long_run_growth_rate`: where revenue growth decays toward (default ~0.06)
-  `current_market_penetration`: fraction of TAM currently captured (0.0-1.0)
+## What to Watch in Practice
 
-These determine how fast the revenue saturation kicks in for EXPAND firms.
+The model suggests three empirical signals that will reveal whether the cognitive
+mechanism is materializing:
+
+1. **Senior/junior wage premium.** If cognitive tools are widening the skill
+   pyramid, the premium for senior engineers should be rising. Watch L4+ vs L3
+   compensation ratios at major tech firms.
+
+2. **Requirements and architecture tooling adoption.** The first sign of cognitive
+   scope expanding beyond coding is adoption of AI tools for specification, design
+   docs, and architectural review — not just code generation.
+
+3. **Junior engineer utilization rates.** If junior engineers are spending more
+   time directing AI and less time coding, their output per engineer-hour should
+   rise faster than v4 predicts. If they're spending time correcting AI output,
+   the METR slowdown finding may generalize to them too.

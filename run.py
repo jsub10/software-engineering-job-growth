@@ -37,6 +37,12 @@ def parse_args():
     p.add_argument("--sensitivity", metavar="PARAM", default=None)
     p.add_argument("--firm", metavar="PROFILE_YAML", default=None)
     p.add_argument("--firm-compare", action="store_true")
+    p.add_argument("--firm-monte-carlo", action="store_true",
+                   help="Monte Carlo for firm model (varies both market and firm params)")
+    p.add_argument("--breakeven-sensitivity", action="store_true",
+                   help="Show break-even year sensitivity across key parameters")
+    p.add_argument("--crossplot", action="store_true",
+                   help="Cross-plot break-even year: g_tools × parkinson_coefficient")
     p.add_argument("--params", default="config/market_params.yaml")
     p.add_argument("--scenarios-config", default="config/scenarios.yaml")
     return p.parse_args()
@@ -52,14 +58,33 @@ def run_market(args):
     for d in ["output/charts", "output/tables", "output/reports"]:
         os.makedirs(d, exist_ok=True)
 
+    if args.breakeven_sensitivity:
+        from market_model.core.sensitivity import run_breakeven_sensitivity, print_sensitivity_table
+        print("Running break-even sensitivity analysis (6 parameters × 5-6 values each)...")
+        results = run_breakeven_sensitivity(args.params)
+        print_sensitivity_table(results)
+        return
+
+    if args.crossplot:
+        from market_model.core.sensitivity import run_crossplot
+        run_crossplot(args.params)
+        return
+
     if args.monte_carlo:
-        print(f"\nRunning Monte Carlo ({args.iterations} iterations)...")
+        from market_model.core.monte_carlo import run_market_monte_carlo, print_market_mc_report
+        print(f"\nRunning comprehensive market Monte Carlo ({args.iterations} iterations)...")
+        print("Varying all uncertain parameters simultaneously.")
         params = load_params(args.params)
-        mc = MarketModel(params).monte_carlo(n_iterations=args.iterations)
-        _print_mc(mc)
+        mc_results = run_market_monte_carlo(params, n_iterations=args.iterations)
+        print_market_mc_report(mc_results)
         if "charts" in args.output or args.output == "all":
+            legacy = [{"employment_index": r.final_employment,
+                        "g_demand": r.g_demand_yr10,
+                        "g_productivity": r.g_productivity_yr10,
+                        "margin": r.margin_yr10} for r in mc_results]
             from output.charts import plot_monte_carlo
-            plot_monte_carlo(mc, "output/charts/monte_carlo.png")
+            plot_monte_carlo(legacy, "output/charts/monte_carlo.png")
+            print("Chart saved: output/charts/monte_carlo.png")
         return
 
     if args.sensitivity:
@@ -142,8 +167,15 @@ def _print_single(run):
         if abs(v) > 0.0001:
             print(f"    {k:<20} {v:>+.2%}/yr")
     print(f"    {'TOTAL':<20} {final.g_demand:>+.2%}/yr")
-    print(f"  Year {n} productivity:   {final.g_productivity:>+.2%}/yr  "
-          f"(debt drag: -{final.debt_productivity_drag:.2%}/yr)")
+    print(f"")
+    print(f"  Year {n} productivity decomposition:")
+    for k, v in final.g_productivity_components.items():
+        if abs(v) > 0.0001:
+            tag = "  ← V5 cognitive" if k == "cognitive_tasks" else ""
+            print(f"    {k:<22} {v:>+.2%}/yr{tag}")
+    print(f"    {'TOTAL':<22} {final.g_productivity:>+.2%}/yr")
+    print(f"  Cognitive scope (yr {n}): {final.cognitive_scope:.1%} of cognitive work AI-assisted")
+    print(f"  Cognitive gain (yr {n}):  {final.cognitive_gain:>+.2%}/yr  (NO EMPIRICAL BASIS)")
     print(f"  To flip direction:    productivity must {'fall below' if final.jevons_holds else 'stay below'} "
           f"{final.productivity_to_flip:.2%}/yr")
     print(f"  Stocks: backlog {final.backlog_level:.1f}mo, debt {final.debt_level:.1f}%")
@@ -212,6 +244,40 @@ def run_firm(args):
     from market_model.core.scenario_runner import run_scenario, load_params
     from firm_model.core.firm_model import FirmModel, FirmProfile
 
+    if args.firm_monte_carlo:
+        from market_model.core.monte_carlo import run_firm_monte_carlo, print_firm_mc_report
+        base_mp = load_params(args.params)
+        # Use supplied firm profile as base, or generic default
+        if args.firm:
+            with open(args.firm) as f:
+                base_fp = yaml.safe_load(f)
+            profile_name = base_fp.get("name", args.firm)
+        else:
+            base_fp = {
+                "name": "Generic Firm", "industry": "general",
+                "current_headcount": 100, "junior_fraction": 0.35,
+                "senior_fraction": 0.20, "annual_revenue_usd": 50000000,
+                "revenue_growth_rate": 0.10, "long_run_growth_rate": 0.06,
+                "current_market_penetration": 0.10,
+                "software_is_core_product": True, "build_buy_ratio": 0.80,
+                "backlog_months": 6.0, "technical_debt_pct": 35.0,
+                "has_legacy_modernization": False,
+                "will_pass_savings_to_customers": False,
+                "competitive_intensity": "medium",
+                "capital_efficiency_pressure": "medium",
+                "firm_parkinson_override": None,
+                "agentic_adoption_rate": 0.30, "adoption_maturity": "early",
+            }
+            profile_name = "Generic Firm (population draw)"
+        print(f"\nRunning firm Monte Carlo ({args.iterations} iterations): {profile_name}")
+        print("Varies both market model parameters and firm profile characteristics.")
+        results = run_firm_monte_carlo(
+            base_mp, base_fp, n_iterations=args.iterations,
+            vary_firm_params=True, vary_market_params=True,
+        )
+        print_firm_mc_report(results, profile_name)
+        return
+
     market_run = run_scenario(args.scenario, args.params, args.scenarios_config,
                               args.exogenous, args.adoption, args.overrides)
     market_params = load_params(args.params)
@@ -253,7 +319,7 @@ def run_firm(args):
 
 def main():
     args = parse_args()
-    if args.firm or args.firm_compare:
+    if args.firm or args.firm_compare or args.firm_monte_carlo:
         run_firm(args)
     else:
         run_market(args)
