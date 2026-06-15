@@ -1,0 +1,19 @@
+name: "Acme SaaS Co."
+industry: enterprise_saas
+current_headcount: 200
+junior_fraction: 0.30
+senior_fraction: 0.22
+annual_revenue_usd: 80000000
+revenue_growth_rate: 0.18
+long_run_growth_rate: 0.07
+current_market_penetration: 0.08
+software_is_core_product: true
+build_buy_ratio: 0.85
+backlog_months: 9.0
+technical_debt_pct: 38.0
+has_legacy_modernization: false
+will_pass_savings_to_customers: false
+competitive_intensity: high
+capital_efficiency_pressure: medium
+agentic_adoption_rate: 0.45
+adoption_maturity: developing

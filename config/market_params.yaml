@@ -1,0 +1,75 @@
+context:
+  simulation_years: 10
+  annual_cost_reduction_rate: 0.12
+
+production:
+  phi: 0.85
+
+segments:
+  consumer:   {weight: 0.20}
+  smb:        {weight: 0.25}
+  enterprise: {weight: 0.40}
+  regulated:  {weight: 0.15}
+
+adoption:
+  p: 0.03
+  q: 0.38
+  initial_adoption: 0.15
+  max_adoption: 0.85
+
+demand:
+  price_elasticity:
+    consumer: 1.80
+    smb: 1.40
+    enterprise: 0.45
+    regulated: 0.20
+  market_expandability:
+    consumer: 0.60
+    smb: 0.80
+    enterprise: 0.30
+    regulated: 0.20
+  max_cumulative_expansion: 0.60
+  backlog_initial_months: 6.0
+  backlog_inflow_rate: 1.0
+  parkinson_coefficient: 0.40
+  agentic_expansion_rate: 0.10
+  backlog_completion_rate: 2.0
+  backlog_floor_months: 2.0
+  tech_debt_initial_pct: 40.0
+  debt_per_unit_output: 0.05
+  ai_debt_premium: 0.35
+  speed_pressure_factor: 0.15
+  debt_repayment_rate: 0.08
+  debt_focus_fraction: 0.20
+  debt_floor_fraction: 0.15
+  debt_productivity_drag: 0.0003
+  underserved_fraction: 0.25
+  underserved_threshold: 0.40
+  underserved_penetration_rate: 0.12
+  underserved_floor_fraction: 0.10
+  induced_market_size: 0.20
+  induced_p: 0.02
+  induced_q: 0.30
+  induced_start_year: 3
+  demand_ceiling: 3.0
+
+labor:
+  alpha_experienced: -0.19
+  alpha_routine: 0.20
+  f_auto: 0.35
+  f_verify: 0.25
+  g_tools: 0.20
+  pipeline_lag_years: 7
+
+market:
+  consumer_capture_rate:
+    consumer: 0.70
+    smb: 0.55
+    enterprise: 0.30
+    regulated: 0.20
+
+exogenous:
+  gdp_environment: 1.0
+  immigration_policy: 1.0
+  education_supply: 1.0
+  regulatory_environment: 1.0

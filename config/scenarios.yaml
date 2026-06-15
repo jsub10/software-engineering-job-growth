@@ -1,0 +1,84 @@
+scenarios:
+  base:
+    description: "Empirically calibrated defaults."
+    overrides: {}
+
+  jevons_holds:
+    description: "Strong demand expansion: high capture rate, large backlog, underserved markets."
+    overrides:
+      context: {annual_cost_reduction_rate: 0.20}
+      demand:
+        backlog_initial_months: 12.0
+        parkinson_coefficient: 0.20
+        underserved_fraction: 0.50
+        underserved_threshold: 0.20
+        induced_market_size: 0.35
+      market:
+        consumer_capture_rate: {consumer: 0.90, smb: 0.75, enterprise: 0.50, regulated: 0.35}
+      labor:
+        alpha_experienced: -0.05
+        alpha_routine: 0.35
+        g_tools: 0.25
+
+  jevons_fails:
+    description: "Productivity dominates: rapid tool improvement, savings not passed to market."
+    overrides:
+      context: {annual_cost_reduction_rate: 0.25}
+      labor:
+        alpha_experienced: 0.15
+        alpha_routine: 0.50
+        f_auto: 0.60
+        f_verify: 0.08
+        g_tools: 0.45
+      market:
+        consumer_capture_rate: {consumer: 0.15, smb: 0.10, enterprise: 0.06, regulated: 0.03}
+      demand:
+        backlog_initial_months: 3.0
+        parkinson_coefficient: 0.60
+        underserved_fraction: 0.05
+        induced_market_size: 0.05
+
+  metr_generalizes:
+    description: "METR 19% slowdown persists; tools fail to improve for experienced devs."
+    overrides:
+      labor:
+        alpha_experienced: -0.30
+        alpha_routine: 0.05
+        g_tools: 0.05
+        f_verify: 0.45
+      context: {annual_cost_reduction_rate: 0.04}
+
+  high_parkinson:
+    description: "Strong Parkinson's Law: capacity fills as fast as it's created."
+    overrides:
+      demand:
+        parkinson_coefficient: 0.75
+        agentic_expansion_rate: 0.20
+
+  high_ai_debt:
+    description: "AI-generated code creates severe technical debt burden."
+    overrides:
+      demand:
+        ai_debt_premium: 0.65
+        debt_productivity_drag: 0.006
+        speed_pressure_factor: 0.30
+
+  new_markets:
+    description: "Underserved SMB/global markets unlock at scale."
+    overrides:
+      context: {annual_cost_reduction_rate: 0.22}
+      demand:
+        underserved_fraction: 0.55
+        underserved_threshold: 0.12
+        induced_market_size: 0.40
+      market:
+        consumer_capture_rate: {consumer: 0.85, smb: 0.80, enterprise: 0.45, regulated: 0.25}
+
+  incumbent_capture:
+    description: "Software firms retain all efficiency gains as margin."
+    overrides:
+      market:
+        consumer_capture_rate: {consumer: 0.10, smb: 0.08, enterprise: 0.04, regulated: 0.02}
+      demand:
+        backlog_initial_months: 3.0
+        underserved_fraction: 0.05

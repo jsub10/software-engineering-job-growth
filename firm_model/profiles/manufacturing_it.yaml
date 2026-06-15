@@ -1,0 +1,19 @@
+name: "Manufacturing Corp IT"
+industry: manufacturing
+current_headcount: 80
+junior_fraction: 0.32
+senior_fraction: 0.20
+annual_revenue_usd: 500000000
+revenue_growth_rate: 0.03
+long_run_growth_rate: 0.02
+current_market_penetration: 0.60
+software_is_core_product: false
+build_buy_ratio: 0.45
+backlog_months: 4.0
+technical_debt_pct: 45.0
+has_legacy_modernization: false
+will_pass_savings_to_customers: false
+competitive_intensity: low
+capital_efficiency_pressure: high
+agentic_adoption_rate: 0.18
+adoption_maturity: early

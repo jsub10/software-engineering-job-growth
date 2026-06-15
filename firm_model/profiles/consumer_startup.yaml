@@ -1,0 +1,19 @@
+name: "Consumer Tech Startup"
+industry: consumer_tech
+current_headcount: 25
+junior_fraction: 0.44
+senior_fraction: 0.16
+annual_revenue_usd: 4000000
+revenue_growth_rate: 0.55
+long_run_growth_rate: 0.08
+current_market_penetration: 0.02
+software_is_core_product: true
+build_buy_ratio: 0.95
+backlog_months: 18.0
+technical_debt_pct: 18.0
+has_legacy_modernization: false
+will_pass_savings_to_customers: true
+competitive_intensity: high
+capital_efficiency_pressure: low
+agentic_adoption_rate: 0.72
+adoption_maturity: developing
