@@ -77,6 +77,12 @@ def run_market(args):
         params = load_params(args.params)
         mc_results = run_market_monte_carlo(params, n_iterations=args.iterations)
         print_market_mc_report(mc_results)
+        from output.mc_report import write_market_mc_report
+        report_path = write_market_mc_report(
+            mc_results, n_years=params["context"]["simulation_years"],
+            n_iterations=args.iterations, params_label=args.params,
+        )
+        print(f"\nDetailed report saved: {report_path}")
         if "charts" in args.output or args.output == "all":
             legacy = [{"employment_index": r.final_employment,
                         "g_demand": r.g_demand_yr10,
@@ -276,6 +282,12 @@ def run_firm(args):
             vary_firm_params=True, vary_market_params=True,
         )
         print_firm_mc_report(results, profile_name)
+        from output.mc_report import write_firm_mc_report
+        report_path = write_firm_mc_report(
+            results, n_years=base_mp["context"]["simulation_years"],
+            n_iterations=args.iterations, profile_name=profile_name,
+        )
+        print(f"\nDetailed report saved: {report_path}")
         return
 
     market_run = run_scenario(args.scenario, args.params, args.scenarios_config,

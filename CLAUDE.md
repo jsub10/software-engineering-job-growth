@@ -40,7 +40,8 @@ python run.py --scenario cognitive_optimistic    # aggressive cognitive scenario
 python run.py --scenario cognitive_off           # reproduces v4 exactly
 python run.py --firm firm_model/profiles/enterprise_saas.yaml
 python run.py --firm-compare
-python run.py --monte-carlo --iterations 1000
+python run.py --monte-carlo --iterations 1000   # writes a timestamped report to output/reports/
+python run.py --firm-monte-carlo --iterations 1000  # firm report to output/reports/
 python run.py --sensitivity labor.g_tools
 python run.py --breakeven-sensitivity      # NEW: break-even year across 6 key params
 python run.py --crossplot                  # NEW: break-even grid: g_tools × parkinson
