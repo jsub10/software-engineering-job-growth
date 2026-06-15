@@ -39,6 +39,8 @@ def parse_args():
     p.add_argument("--firm-compare", action="store_true")
     p.add_argument("--firm-monte-carlo", action="store_true",
                    help="Monte Carlo for firm model (varies both market and firm params)")
+    p.add_argument("--combined-monte-carlo", action="store_true",
+                   help="Run market AND firm Monte Carlo and write one combined comparison report")
     p.add_argument("--breakeven-sensitivity", action="store_true",
                    help="Show break-even year sensitivity across key parameters")
     p.add_argument("--crossplot", action="store_true",
@@ -246,6 +248,59 @@ def _handle_output(args, all_results):
         print("Report saved: output/reports/report.md")
 
 
+def resolve_firm_base_profile(args):
+    """Return (base_firm_profile_dict, profile_name) from --firm or a generic default."""
+    if args.firm:
+        with open(args.firm) as f:
+            base_fp = yaml.safe_load(f)
+        return base_fp, base_fp.get("name", args.firm)
+    base_fp = {
+        "name": "Generic Firm", "industry": "general",
+        "current_headcount": 100, "junior_fraction": 0.35,
+        "senior_fraction": 0.20, "annual_revenue_usd": 50000000,
+        "revenue_growth_rate": 0.10, "long_run_growth_rate": 0.06,
+        "current_market_penetration": 0.10,
+        "software_is_core_product": True, "build_buy_ratio": 0.80,
+        "backlog_months": 6.0, "technical_debt_pct": 35.0,
+        "has_legacy_modernization": False,
+        "will_pass_savings_to_customers": False,
+        "competitive_intensity": "medium",
+        "capital_efficiency_pressure": "medium",
+        "firm_parkinson_override": None,
+        "agentic_adoption_rate": 0.30, "adoption_maturity": "early",
+    }
+    return base_fp, "Generic Firm (population draw)"
+
+
+def run_combined(args):
+    """Run market AND firm Monte Carlo, then write one combined comparison report."""
+    from market_model.core.scenario_runner import load_params
+    from market_model.core.monte_carlo import (
+        run_market_monte_carlo, run_firm_monte_carlo,
+    )
+    from output.mc_report import write_combined_mc_report
+
+    os.makedirs("output/reports", exist_ok=True)
+    base_mp = load_params(args.params)
+    base_fp, profile_name = resolve_firm_base_profile(args)
+
+    print(f"\nRunning combined Monte Carlo ({args.iterations} iterations each)...")
+    print("  market model...")
+    market_results = run_market_monte_carlo(base_mp, n_iterations=args.iterations)
+    print(f"  firm model ({profile_name})...")
+    firm_results = run_firm_monte_carlo(
+        base_mp, base_fp, n_iterations=args.iterations,
+        vary_firm_params=True, vary_market_params=True,
+    )
+    report_path = write_combined_mc_report(
+        market_results, firm_results,
+        n_years=base_mp["context"]["simulation_years"],
+        n_iterations=args.iterations, profile_name=profile_name,
+        params_label=args.params,
+    )
+    print(f"\nCombined report saved: {report_path}")
+
+
 def run_firm(args):
     from market_model.core.scenario_runner import run_scenario, load_params
     from firm_model.core.firm_model import FirmModel, FirmProfile
@@ -253,28 +308,7 @@ def run_firm(args):
     if args.firm_monte_carlo:
         from market_model.core.monte_carlo import run_firm_monte_carlo, print_firm_mc_report
         base_mp = load_params(args.params)
-        # Use supplied firm profile as base, or generic default
-        if args.firm:
-            with open(args.firm) as f:
-                base_fp = yaml.safe_load(f)
-            profile_name = base_fp.get("name", args.firm)
-        else:
-            base_fp = {
-                "name": "Generic Firm", "industry": "general",
-                "current_headcount": 100, "junior_fraction": 0.35,
-                "senior_fraction": 0.20, "annual_revenue_usd": 50000000,
-                "revenue_growth_rate": 0.10, "long_run_growth_rate": 0.06,
-                "current_market_penetration": 0.10,
-                "software_is_core_product": True, "build_buy_ratio": 0.80,
-                "backlog_months": 6.0, "technical_debt_pct": 35.0,
-                "has_legacy_modernization": False,
-                "will_pass_savings_to_customers": False,
-                "competitive_intensity": "medium",
-                "capital_efficiency_pressure": "medium",
-                "firm_parkinson_override": None,
-                "agentic_adoption_rate": 0.30, "adoption_maturity": "early",
-            }
-            profile_name = "Generic Firm (population draw)"
+        base_fp, profile_name = resolve_firm_base_profile(args)
         print(f"\nRunning firm Monte Carlo ({args.iterations} iterations): {profile_name}")
         print("Varies both market model parameters and firm profile characteristics.")
         results = run_firm_monte_carlo(
@@ -331,7 +365,9 @@ def run_firm(args):
 
 def main():
     args = parse_args()
-    if args.firm or args.firm_compare or args.firm_monte_carlo:
+    if args.combined_monte_carlo:
+        run_combined(args)
+    elif args.firm or args.firm_compare or args.firm_monte_carlo:
         run_firm(args)
     else:
         run_market(args)
