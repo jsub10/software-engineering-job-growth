@@ -70,6 +70,40 @@ does more). The difference between them is the **margin**.
 
 ---
 
+## 2a. Year-3 snapshot — demand vs. productivity
+
+The break-even race plays out over time, so the early years look very different
+from year 10. Looking specifically at **year 3** (extracted with `year3_analysis.py`,
+which replays the identical MC draw — seed 42, same parameter order):
+
+| | Productivity grows **≥** demand | Demand wins (Jevons holds) |
+|---|---|---|
+| **Year 3** | **30.1%** of runs | 69.9% |
+| **Year 10** | ~71.9% of runs | 28.1% |
+
+**At year 3, productivity grows as fast or faster than demand in only 30.1% of runs**
+(301 of 1,000 — all strictly faster; exact ties have effectively zero probability with
+continuous draws). In the other **69.9%**, demand is still outrunning productivity.
+
+Year-3 growth-rate distribution:
+
+| Quantity | P10 | P25 | P50 | P75 | P90 |
+|---|---|---|---|---|---|
+| Demand growth (%/yr) | — | — | **9.7** | — | — |
+| Productivity growth (%/yr) | — | — | **7.5** | — | — |
+| Margin (Demand − Productivity, %/yr) | −3.4 | −0.6 | **+2.8** | +6.5 | +11.1 |
+
+### What this says — the picture *flips* over the decade
+The median year-3 margin is **+2.8%/yr** (demand winning), versus **−5.0%/yr at year 10**
+(productivity winning). Early on, demand growth is still high because the backlog hasn't
+been depleted, while productivity gains are suppressed (METR drag, plus routine/cognitive
+automation not yet matured). By year 10 that reverses: productivity accelerates as tools
+mature and demand decays as backlog clears. **Year 3 sits firmly in the "demand still
+winning" regime for ~70% of scenarios** — the crossover to productivity-dominance comes
+later.
+
+---
+
 ## 3. Verdicts — how often does each outcome occur?
 
 Share of the 1,000 runs ending in each state at year 10:
