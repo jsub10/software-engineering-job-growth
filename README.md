@@ -24,36 +24,42 @@ effectively — see less benefit from cognitive tools than from routine automati
 ## Primary Output: Three Numbers
 
 ```
-Peak employment:   1.150× baseline  (year 8)
-Break-even year:   year 9            (first year employment starts declining)
-Final employment:  1.143× baseline  (year 10)
+Peak employment:   1.112× baseline  (year 4)
+Break-even year:   year 5            (first year employment starts declining)
+Final employment:  1.106× baseline  (year 5)
 ```
 
-Read as: under base assumptions, employment rises 15% above baseline by year 8,
-then starts declining. By year 10, still 14% above baseline. The trajectory matters
-more than any single number.
+Read as: under base assumptions, employment rises 11% above baseline by year 4,
+then starts declining. By year 5 (the end of the modeled horizon), still 11% above
+baseline. The trajectory matters more than any single number.
 
 ## V5 vs V4 Comparison
 
+Over the 5-year horizon (`context.simulation_years: 5`):
+
 | Scenario              | Peak | Peak Yr | Break-Even | Final |
 |---|---|---|---|---|
-| cognitive_off (= v4)  | 1.174 | 10 | never | 1.174 |
-| cognitive_conservative | 1.166 | 9 | yr 10 | 1.164 |
-| base (v5 default)     | 1.150 | 8 | yr 9  | 1.143 |
-| cognitive_optimistic  | 1.116 | 4 | yr 5  | 1.059 |
+| cognitive_off (= v4)  | 1.114 | 4 | yr 5 | 1.111 |
+| cognitive_conservative | 1.113 | 4 | yr 5 | 1.110 |
+| base (v5 default)     | 1.112 | 4 | yr 5 | 1.106 |
+| cognitive_optimistic  | 1.106 | 3 | yr 4 | 1.090 |
 
 More cognitive capability → earlier peak → earlier decline. The break-even year
-is the key indicator to watch in practice.
+is the key indicator to watch in practice. Within a 5-year window the scenarios
+compress (all peak around year 4); the divergence between them widens over longer
+horizons.
 
 ## Tier Effects
 
 The widening skill pyramid is V5's most important structural prediction:
 
+Employment index by tier at year 5:
+
 | Scenario | Junior | Mid | Senior | Architect (relative) |
 |---|---|---|---|---|
-| cognitive_off | 0.962 | 1.127 | 1.432 | — |
-| base (v5) | 0.872 | 1.123 | 1.524 | higher |
-| cognitive_optimistic | 0.749 | 1.063 | 1.529 | highest |
+| cognitive_off | 0.911 | 1.066 | 1.285 | — |
+| base (v5) | 0.864 | 1.079 | 1.361 | higher |
+| cognitive_optimistic | 0.798 | 1.083 | 1.441 | highest |
 
 Junior employment falls as cognitive tools become more capable — not because
 junior engineers are displaced by routine automation (that's already in v4),
@@ -104,7 +110,7 @@ agentic-labor-model-v5/
 │       ├── consumer_startup.yaml
 │       └── manufacturing_it.yaml
 └── tests/
-    └── test_v4.py                    ← 40 tests (31 v4 + 9 cognitive)
+    └── test_v4.py                    ← 48 tests (v4 core + cognitive + firm backlog)
 ```
 
 ## Quickstart
@@ -112,12 +118,12 @@ agentic-labor-model-v5/
 ```bash
 pip install -r requirements.txt
 python run.py                                     # base with v5 cognitive
-python run.py --scenarios all                     # all 11 scenarios
+python run.py --scenarios all                     # all 16 scenarios
 python run.py --scenario cognitive_optimistic     # aggressive cognitive
 python run.py --scenario cognitive_off            # v4 behavior exactly
 python run.py --firm-compare                      # all firm profiles
 python run.py --monte-carlo --iterations 1000
-python -m pytest tests/ -v                        # 40 tests
+python -m pytest tests/ -v                        # 48 tests
 ```
 
 ## Empirical Confidence
