@@ -1,4 +1,4 @@
-"""Chart generation for v4."""
+"""Chart generation for v5."""
 import os
 
 def _plt():
@@ -17,7 +17,7 @@ def plot_breakeven_fan(all_results, save_path):
         ax = axes_flat[i]
         years = [r.year for r in run.breakeven]
         gd = [r.g_demand * 100 for r in run.breakeven]
-        gp = [r.g_productivity_actual * 100 for r in run.breakeven]
+        gp = [r.g_productivity * 100 for r in run.breakeven]
         gdl = [r.g_demand_low * 100 for r in run.breakeven]
         gdh = [r.g_demand_high * 100 for r in run.breakeven]
         ax.fill_between(years, gdl, gdh, alpha=0.2, color="#2196F3")
@@ -30,7 +30,7 @@ def plot_breakeven_fan(all_results, save_path):
         ax.set_title(name, fontsize=10, fontweight="bold")
         ax.set_xlabel("Year"); ax.set_ylabel("%/yr"); ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
     for j in range(i+1, len(axes_flat)): axes_flat[j].set_visible(False)
-    fig.suptitle("Break-Even Analysis v4\n(Green=Jevons holds; Red=fails)", fontsize=12, fontweight="bold")
+    fig.suptitle("Break-Even Analysis v5\n(Green=Jevons holds; Red=fails)", fontsize=12, fontweight="bold")
     plt.tight_layout(); os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=150, bbox_inches="tight"); plt.close()
 
@@ -46,7 +46,7 @@ def plot_stocks(all_results, save_path):
                  color=colors[i % len(colors)], lw=2, marker="s", ms=3, label=name)
     ax1.set_title("Backlog Stock (months)"); ax1.set_xlabel("Year"); ax1.legend(fontsize=8); ax1.grid(True, alpha=0.3)
     ax2.set_title("Technical Debt (% of capacity)"); ax2.set_xlabel("Year"); ax2.legend(fontsize=8); ax2.grid(True, alpha=0.3)
-    fig.suptitle("Dynamic Demand Stocks — v4", fontsize=12, fontweight="bold")
+    fig.suptitle("Dynamic Demand Stocks — v5", fontsize=12, fontweight="bold")
     plt.tight_layout(); os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=150, bbox_inches="tight"); plt.close()
 

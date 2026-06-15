@@ -31,8 +31,10 @@ htmlcov/
 # Claude Code local settings
 .claude/
 
-# Generated Monte Carlo run reports (timestamped artifacts)
+# Generated output artifacts (charts, tables, reports)
 output/reports/*.md
+output/charts/*.png
+output/tables/*.csv
 
 # Note: image files (*.png, *.jpg, *.svg, etc.) are intentionally NOT ignored
 # so model output plots can be committed.
