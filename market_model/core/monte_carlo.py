@@ -367,13 +367,13 @@ def print_market_mc_report(results: List[MarketMCResult]) -> None:
     if beys:
         row("Break-even year (when declined)", beys, ".0f")
     print(f"  {'Employment never declines':30}  {bey_nevers/n:>7.1%} of runs")
-    row("Final employment (yr 10)", finals)
+    row("Final employment (final yr)", finals)
 
-    print(f"\n── BREAK-EVEN MARGIN (year 10) ──────────────────────────────────")
+    print(f"\n── BREAK-EVEN MARGIN (final year) ───────────────────────────────")
     row("Demand growth %/yr", g_demands, ".1f")
     row("Productivity growth %/yr", g_prods, ".1f")
     row("Margin (D - P) %/yr", margins, ".1f")
-    print(f"  {'Jevons holds at yr 10':30}  {pct_jevons_yr10:>8.1%} of runs")
+    print(f"  {'Jevons holds (final yr)':30}  {pct_jevons_yr10:>8.1%} of runs")
 
     print(f"\n── VERDICTS ─────────────────────────────────────────────────────")
     print(f"  Final employment > baseline (1.0):  {pct_above_1:.1%} of runs")

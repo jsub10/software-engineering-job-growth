@@ -106,6 +106,7 @@ cognitive_conservative: 20% scope max, slow growth (0.10/yr)
 cognitive_optimistic:   50% scope max, faster growth (0.25/yr)
 
 ## Updated base parameters (v5 revised)
+  simulation_years: 5         (horizon; results reported through year 5)
   parkinson_coefficient: 0.25  (was 0.40; lower = weaker Parkinson = sooner break-even)
   alpha_maturation_years: 5.0  (new param; controls METR drag → routine gain transition)
   Result: peak employment at year 4, break-even at year 5
@@ -115,5 +116,6 @@ With cognitive tools, the employment outcome becomes MORE EXTREME in both direct
   - If cognitive leverage drives demand expansion: substantially more engineers
   - If cognitive productivity dominates and demand doesn't expand: substantially fewer
 The model shows the break-even year arriving earlier when cognitive tools are more capable.
-Base scenario: peaks year 8, starts declining year 9.
-Cognitive_optimistic: peaks year 4, starts declining year 5.
+Over the 5-year horizon:
+Base scenario: peaks year 4, starts declining year 5.
+Cognitive_optimistic: peaks year 3, starts declining year 4.
