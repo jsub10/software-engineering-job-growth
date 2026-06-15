@@ -60,6 +60,15 @@ junior engineers are displaced by routine automation (that's already in v4),
 but because cognitive tools require expertise to direct, and juniors lack that
 expertise. The skill premium for senior engineers grows with cognitive tool capability.
 
+## Documentation
+
+- [docs/monte_carlo_ranges.md](docs/monte_carlo_ranges.md) — Monte Carlo parameter ranges: hard limits vs. sampling bands for every varied variable
+- [docs/monte_carlo_results.md](docs/monte_carlo_results.md) — Monte Carlo results report (1,000 iterations)
+- [docs/variable_documentation.md](docs/variable_documentation.md) — Complete variable reference: base values, hard limits, MC ranges, empirical confidence
+- [docs/v5_cognitive_additions.md](docs/v5_cognitive_additions.md) — Why and how the cognitive components work
+- [docs/model_explanation_detailed.md](docs/model_explanation_detailed.md) — Detailed model walkthrough
+- [docs/model_explanation_simple.md](docs/model_explanation_simple.md) — Plain-language overview
+
 ## Architecture
 
 ```
