@@ -12,8 +12,14 @@ For every variable varied in the Monte Carlo analysis, this table lists both:
 
 The **Description** column is a plain-language summary of what each variable means.
 
-Source of truth: `market_model/core/monte_carlo.py` (`MARKET_MC_PARAMS`, `FIRM_MC_PARAMS`,
-`FIRM_CATEGORICAL`) for the MC bands; `docs/variable_documentation.md` for hard limits.
+> **To change a range for a run, edit `config/monte_carlo_ranges.yaml`** — that file
+> holds the same variables and is loaded by every Monte Carlo run. This document is the
+> human-readable companion; the YAML is the editable source. If the YAML is missing, the
+> model falls back to the built-in defaults in `market_model/core/monte_carlo.py`.
+
+Source of truth: `config/monte_carlo_ranges.yaml` (loaded via `load_mc_ranges`) for the
+MC bands, with built-in defaults in `market_model/core/monte_carlo.py`;
+`docs/variable_documentation.md` for hard limits.
 
 ---
 

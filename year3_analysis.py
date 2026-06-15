@@ -7,13 +7,14 @@ records the break-even entry for year 3 instead of only year 10.
 """
 import copy, random
 from market_model.core.scenario_runner import load_params
-from market_model.core.monte_carlo import MARKET_MC_PARAMS, _set_nested
+from market_model.core.monte_carlo import load_mc_ranges, _set_nested
 from market_model.core.model import MarketModel
 
 N = 1000
 TARGET_YEAR = 3
 
 base_params = load_params("config/market_params.yaml")
+market_ranges, _, _ = load_mc_ranges()  # same ranges as run_market_monte_carlo
 rng = random.Random(42)  # same seed as run_market_monte_carlo default
 
 margins_yr3 = []      # margin = g_demand - g_productivity  (>0 => demand wins, Jevons)
@@ -22,7 +23,7 @@ demand_yr3 = []
 
 for i in range(N):
     p = copy.deepcopy(base_params)
-    for path, (lo, hi) in MARKET_MC_PARAMS.items():
+    for path, (lo, hi) in market_ranges.items():
         if "consumer_capture_rate." in path:
             segment = path.split(".")[-1]
             p["market"]["consumer_capture_rate"][segment] = rng.uniform(lo, hi)

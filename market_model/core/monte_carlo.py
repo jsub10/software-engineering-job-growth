@@ -28,6 +28,7 @@ INTERPRETATION:
 
 import copy
 import math
+import os
 import random
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
@@ -108,6 +109,53 @@ FIRM_CATEGORICAL = {
 }
 
 
+# Default path for the editable Monte Carlo ranges config.
+DEFAULT_MC_RANGES_PATH = "config/monte_carlo_ranges.yaml"
+
+
+def load_mc_ranges(path: str = DEFAULT_MC_RANGES_PATH):
+    """Load Monte Carlo sampling ranges from a YAML config.
+
+    Returns (market_ranges, firm_ranges, firm_categorical) where market_ranges
+    and firm_ranges are {name: (mc_low, mc_high)} and firm_categorical is
+    {name: {value: probability}}.
+
+    Falls back to the built-in module defaults (MARKET_MC_PARAMS,
+    FIRM_MC_PARAMS, FIRM_CATEGORICAL) when the file — or an individual section —
+    is absent, so the model still runs out of the box. Entry order from the
+    YAML is preserved (it determines the draw order for a fixed seed).
+    """
+    market = dict(MARKET_MC_PARAMS)
+    firm = dict(FIRM_MC_PARAMS)
+    categorical = {k: dict(v) for k, v in FIRM_CATEGORICAL.items()}
+
+    if not path or not os.path.exists(path):
+        return market, firm, categorical
+
+    with open(path) as f:
+        cfg = yaml.safe_load(f) or {}
+
+    def _band(name: str, spec: dict):
+        lo, hi = float(spec["mc_low"]), float(spec["mc_high"])
+        if lo > hi:
+            raise ValueError(f"monte_carlo_ranges: {name} mc_low ({lo}) > mc_high ({hi})")
+        hard_min, hard_max = spec.get("hard_min"), spec.get("hard_max")
+        if hard_min is not None and lo < float(hard_min):
+            print(f"  [mc-ranges] WARNING: {name} mc_low {lo} below hard_min {hard_min}")
+        if hard_max is not None and hi > float(hard_max):
+            print(f"  [mc-ranges] WARNING: {name} mc_high {hi} above hard_max {hard_max}")
+        return (lo, hi)
+
+    if cfg.get("market"):
+        market = {name: _band(name, spec) for name, spec in cfg["market"].items()}
+    if cfg.get("firm"):
+        firm = {name: _band(name, spec) for name, spec in cfg["firm"].items()}
+    if cfg.get("firm_categorical"):
+        categorical = {name: dict(spec["values"])
+                       for name, spec in cfg["firm_categorical"].items()}
+    return market, firm, categorical
+
+
 def _draw_categorical(dist: dict, rng: random.Random) -> object:
     """Draw from a categorical distribution defined as {value: probability}."""
     r = rng.random()
@@ -168,13 +216,16 @@ def run_market_monte_carlo(
     base_params: dict,
     n_iterations: int = 1000,
     seed: int = 42,
+    ranges_path: str = DEFAULT_MC_RANGES_PATH,
 ) -> List[MarketMCResult]:
     """
     Run Monte Carlo simulation over market model parameter uncertainty.
-    Each iteration draws all MARKET_MC_PARAMS and runs the full model.
+    Each iteration draws all market ranges (from ranges_path, or the built-in
+    defaults if it is missing) and runs the full model.
     """
     from market_model.core.model import MarketModel
 
+    market_ranges, _, _ = load_mc_ranges(ranges_path)
     rng = random.Random(seed)
     results = []
 
@@ -183,7 +234,7 @@ def run_market_monte_carlo(
 
         # Draw continuous parameters
         drawn = {}
-        for path, (lo, hi) in MARKET_MC_PARAMS.items():
+        for path, (lo, hi) in market_ranges.items():
             # Handle nested capture_rate specially
             if "consumer_capture_rate." in path:
                 segment = path.split(".")[-1]
@@ -224,16 +275,19 @@ def run_firm_monte_carlo(
     seed: int = 42,
     vary_firm_params: bool = True,
     vary_market_params: bool = True,
+    ranges_path: str = DEFAULT_MC_RANGES_PATH,
 ) -> List[FirmMCResult]:
     """
     Run Monte Carlo for the firm model.
     Varies both firm profile parameters and market model parameters.
     This gives the full distribution of firm outcomes given uncertainty
     in both what the firm looks like and what the market does.
+    Ranges come from ranges_path (or the built-in defaults if it is missing).
     """
     from market_model.core.model import MarketModel
     from firm_model.core.firm_model import FirmModel, FirmProfile
 
+    market_ranges, firm_ranges, firm_categorical = load_mc_ranges(ranges_path)
     rng = random.Random(seed)
     results = []
 
@@ -241,7 +295,7 @@ def run_firm_monte_carlo(
         # Draw market parameters
         mp = copy.deepcopy(base_market_params)
         if vary_market_params:
-            for path, (lo, hi) in MARKET_MC_PARAMS.items():
+            for path, (lo, hi) in market_ranges.items():
                 if "consumer_capture_rate." in path:
                     segment = path.split(".")[-1]
                     mp["market"]["consumer_capture_rate"][segment] = rng.uniform(lo, hi)
@@ -251,7 +305,7 @@ def run_firm_monte_carlo(
         # Draw firm profile parameters
         fp = copy.deepcopy(base_firm_profile)
         if vary_firm_params:
-            for field_name, (lo, hi) in FIRM_MC_PARAMS.items():
+            for field_name, (lo, hi) in firm_ranges.items():
                 # Vary around the base profile value if it exists and is reasonable
                 # This keeps the firm type anchored while exploring uncertainty
                 base_val = base_firm_profile.get(field_name)
@@ -265,7 +319,7 @@ def run_firm_monte_carlo(
                     fp[field_name] = rng.uniform(lo, hi)
             # Only draw categoricals if profile is generic; else use profile values
             is_generic = base_firm_profile.get("name", "").startswith("Generic")
-            for field_name, dist in FIRM_CATEGORICAL.items():
+            for field_name, dist in firm_categorical.items():
                 if is_generic:
                     fp[field_name] = _draw_categorical(dist, rng)
                 # else: keep base profile's categorical values

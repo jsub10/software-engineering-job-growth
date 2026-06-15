@@ -1,0 +1,304 @@
+# Monte Carlo sampling ranges — Agentic Coding Labor Model v5
+#
+# EDIT THIS FILE to change the range each variable is drawn from in a Monte
+# Carlo run. Every continuous parameter is drawn UNIFORMLY over [mc_low, mc_high].
+#
+# Per entry:
+#   description : plain-language meaning (informational)
+#   hard_min    : absolute lower bound; model breaks below this (informational;
+#                 a warning prints if mc_low < hard_min)
+#   hard_max    : absolute upper bound; model breaks above this (informational;
+#                 a warning prints if mc_high > hard_max)
+#   mc_low      : low end of the Monte Carlo sampling band   <-- set this
+#   mc_high     : high end of the Monte Carlo sampling band  <-- set this
+#
+# This file is loaded by market_model/core/monte_carlo.py (load_mc_ranges).
+# If the file is missing, the built-in defaults are used instead. Entry ORDER
+# matters: it sets the order parameters are drawn, so for a fixed seed the
+# results are reproducible only if the order is preserved.
+#
+# See docs/monte_carlo_ranges.md for the same tables in readable form.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MARKET MODEL (continuous)
+# ─────────────────────────────────────────────────────────────────────────────
+market:
+  "labor.g_tools":
+    description: How fast agentic coding tools improve each year (the single most impactful uncertain parameter)
+    hard_min: 0.00
+    hard_max: 0.80
+    mc_low: 0.08
+    mc_high: 0.45
+  "demand.parkinson_coefficient":
+    description: Share of freed-up capacity that becomes new work rather than headcount savings
+    hard_min: 0.00
+    hard_max: 0.70
+    mc_low: 0.05
+    mc_high: 0.50
+  "context.annual_cost_reduction_rate":
+    description: How fast the cost of producing software falls each year
+    hard_min: 0.00
+    hard_max: 0.50
+    mc_low: 0.04
+    mc_high: 0.25
+  "labor.f_verify":
+    description: Share of the automation benefit consumed by reviewing AI-generated output
+    hard_min: 0.00
+    hard_max: 0.70
+    mc_low: 0.08
+    mc_high: 0.50
+  "demand.underserved_fraction":
+    description: Size of untapped markets (vs. today's market) that cheaper software could unlock
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.00
+    mc_high: 0.55
+  "demand.underserved_threshold":
+    description: Cost drop required before those underserved markets start adopting software
+    hard_min: 0.05
+    hard_max: 0.80
+    mc_low: 0.15
+    mc_high: 0.65
+  "demand.induced_market_size":
+    description: Brand-new software categories AI creates, as a share of today's market
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.00
+    mc_high: 0.45
+  "demand.max_cumulative_expansion":
+    description: Ceiling on how much cheaper prices can grow demand (Baumol constraint)
+    hard_min: 0.05
+    hard_max: 2.00
+    mc_low: 0.20
+    mc_high: 1.00
+  "production.phi":
+    description: Returns to adding engineers; below 1 means coordination overhead (Brooks' Law)
+    hard_min: 0.50
+    hard_max: 1.00
+    mc_low: 0.70
+    mc_high: 0.97
+  "demand.agentic_expansion_rate":
+    description: Rate at which newly-feasible projects enter the backlog because tools make them viable
+    hard_min: 0.00
+    hard_max: 0.40
+    mc_low: 0.02
+    mc_high: 0.25
+  "cognitive.alpha_cognitive":
+    description: Productivity gain on cognitive work (architecture, debugging, requirements) when AI-assisted
+    hard_min: 0.00
+    hard_max: 0.50
+    mc_low: 0.00
+    mc_high: 0.30
+  "cognitive.cognitive_scope_max":
+    description: The most cognitive work that could ever become AI-assisted
+    hard_min: 0.00
+    hard_max: 0.80
+    mc_low: 0.00
+    mc_high: 0.55
+  "cognitive.cognitive_growth_rate":
+    description: How fast cognitive AI assistance grows toward its ceiling each year
+    hard_min: 0.00
+    hard_max: 0.60
+    mc_low: 0.05
+    mc_high: 0.35
+  "cognitive.cognitive_maturation_years":
+    description: Years for cognitive AI assistance to fully mature
+    hard_min: 2.0
+    hard_max: 20.0
+    mc_low: 4.0
+    mc_high: 14.0
+  "labor.alpha_maturation_years":
+    description: Years for the early productivity drag to give way to routine gains
+    hard_min: 1.0
+    hard_max: 15.0
+    mc_low: 2.0
+    mc_high: 8.0
+  "adoption.q":
+    description: Word-of-mouth / imitation speed of tool adoption (Bass diffusion)
+    hard_min: 0.05
+    hard_max: 0.80
+    mc_low: 0.20
+    mc_high: 0.55
+  "adoption.initial_adoption":
+    description: Share of engineers already using mature agentic tools at the start
+    hard_min: 0.00
+    hard_max: 0.60
+    mc_low: 0.08
+    mc_high: 0.35
+  "adoption.max_adoption":
+    description: Long-run ceiling on tool adoption
+    hard_min: 0.40
+    hard_max: 1.00
+    mc_low: 0.70
+    mc_high: 0.95
+  "demand.backlog_initial_months":
+    description: Months of unfinished work in the backlog at the start
+    hard_min: 0.5
+    hard_max: 24.0
+    mc_low: 3.0
+    mc_high: 12.0
+  "labor.alpha_experienced":
+    description: Early productivity effect for experienced devs (negative = slowdown, per METR)
+    hard_min: -0.60
+    hard_max: 0.30
+    mc_low: -0.40
+    mc_high: 0.05
+  "labor.alpha_routine":
+    description: Long-run productivity gain on routine tasks (coding, testing, docs)
+    hard_min: -0.10
+    hard_max: 0.70
+    mc_low: 0.05
+    mc_high: 0.45
+  "labor.f_auto":
+    description: Fraction of engineering tasks that are automatable
+    hard_min: 0.10
+    hard_max: 0.75
+    mc_low: 0.20
+    mc_high: 0.55
+  "demand.tech_debt_initial_pct":
+    description: Share of engineering capacity spent maintaining technical debt today
+    hard_min: 5.0
+    hard_max: 80.0
+    mc_low: 25.0
+    mc_high: 58.0
+  "demand.ai_debt_premium":
+    description: Extra technical debt AI-generated code adds per line
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.10
+    mc_high: 0.65
+  "market.consumer_capture_rate.consumer":
+    description: Share of cost savings passed to customers in the consumer segment
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.35
+    mc_high: 0.90
+  "market.consumer_capture_rate.smb":
+    description: Share of cost savings passed to customers in the small-business segment
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.25
+    mc_high: 0.80
+  "market.consumer_capture_rate.enterprise":
+    description: Share of cost savings passed to customers in the enterprise segment
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.10
+    mc_high: 0.60
+  "market.consumer_capture_rate.regulated":
+    description: Share of cost savings passed to customers in the regulated-industry segment
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.05
+    mc_high: 0.45
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FIRM MODEL (continuous)
+# Note: when a firm PROFILE supplies a value, draws are anchored to +/-50% of
+# the half-range around that value, clipped to [mc_low, mc_high] below.
+# ─────────────────────────────────────────────────────────────────────────────
+firm:
+  "junior_fraction":
+    description: Share of the firm's engineers who are junior
+    hard_min: 0.05
+    hard_max: 0.70
+    mc_low: 0.20
+    mc_high: 0.55
+  "senior_fraction":
+    description: Share of the firm's engineers who are senior / architect level
+    hard_min: 0.05
+    hard_max: 0.50
+    mc_low: 0.12
+    mc_high: 0.35
+  "revenue_growth_rate":
+    description: The firm's current annual revenue growth
+    hard_min: -0.20
+    hard_max: 2.00
+    mc_low: 0.02
+    mc_high: 0.35
+  "long_run_growth_rate":
+    description: Steady-state growth the firm's revenue decays toward (not clamped in code)
+    hard_min: -0.20
+    hard_max: 2.00
+    mc_low: 0.03
+    mc_high: 0.10
+  "current_market_penetration":
+    description: Share of the firm's total addressable market already captured
+    hard_min: 0.001
+    hard_max: 0.90
+    mc_low: 0.02
+    mc_high: 0.50
+  "build_buy_ratio":
+    description: Share of software the firm builds in-house vs. buys (display-only in the model)
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.30
+    mc_high: 0.98
+  "backlog_months":
+    description: Months of unfinished work in the firm's backlog at the start
+    hard_min: 0.0
+    hard_max: 36.0
+    mc_low: 2.0
+    mc_high: 18.0
+  "technical_debt_pct":
+    description: Share of the firm's capacity spent maintaining technical debt
+    hard_min: 0.0
+    hard_max: 80.0
+    mc_low: 15.0
+    mc_high: 60.0
+  "agentic_adoption_rate":
+    description: Share of the firm's engineers using mature agentic tools
+    hard_min: 0.00
+    hard_max: 1.00
+    mc_low: 0.05
+    mc_high: 0.70
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FIRM MODEL (categorical) — drawn only when the profile name starts with
+# "Generic"; otherwise the profile's own values are kept. Each `values` block is
+# {category: probability}; probabilities should sum to 1.0. Order matters.
+# ─────────────────────────────────────────────────────────────────────────────
+firm_categorical:
+  "industry":
+    description: The firm's industry sector (sets fork biases and the default firm-Parkinson coefficient)
+    values:
+      consumer_tech: 0.15
+      enterprise_saas: 0.25
+      fintech: 0.15
+      healthcare: 0.10
+      manufacturing: 0.15
+      government: 0.10
+      general: 0.10
+  "competitive_intensity":
+    description: How competitive the firm's market is
+    values:
+      low: 0.30
+      medium: 0.45
+      high: 0.25
+  "capital_efficiency_pressure":
+    description: How much pressure the firm is under to cut costs
+    values:
+      low: 0.25
+      medium: 0.50
+      high: 0.25
+  "adoption_maturity":
+    description: How far along the firm is in adopting agentic tools
+    values:
+      early: 0.45
+      developing: 0.40
+      mature: 0.15
+  "will_pass_savings_to_customers":
+    description: Whether the firm passes cost savings on to customers
+    values:
+      true: 0.35
+      false: 0.65
+  "software_is_core_product":
+    description: Whether software is the firm's core product
+    values:
+      true: 0.55
+      false: 0.45
+  "has_legacy_modernization":
+    description: Whether the firm has a legacy-modernization effort underway
+    values:
+      true: 0.20
+      false: 0.80
