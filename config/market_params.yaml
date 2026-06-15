@@ -1,5 +1,5 @@
 context:
-  simulation_years: 10
+  simulation_years: 5
   annual_cost_reduction_rate: 0.12
 
 production:

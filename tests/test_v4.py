@@ -140,7 +140,7 @@ class TestMarketModel:
     def test_base_run_completes(self):
         from market_model.core.model import MarketModel
         result = MarketModel(base_params()).run()
-        assert len(result.breakeven) == 10
+        assert len(result.breakeven) == result.n_years
 
     def test_backlog_never_zero(self):
         from market_model.core.model import MarketModel
@@ -174,7 +174,7 @@ class TestMarketModel:
         p_low["market"]["consumer_capture_rate"] = {s: 0.0 for s in ["consumer","smb","enterprise","regulated"]}
         p_high = copy.deepcopy(p_low); p_high["labor"]["g_tools"] = 0.50
         r_low = MarketModel(p_low).run(); r_high = MarketModel(p_high).run()
-        assert r_high.employment_index[10] < r_low.employment_index[10]
+        assert r_high.employment_index[r_high.n_years] < r_low.employment_index[r_low.n_years]
 
     def test_metr_scenario_holds_jevons(self):
         from market_model.core.scenario_runner import run_scenario
@@ -272,7 +272,7 @@ class TestFirmModel:
                 with open(f"firm_model/profiles/{fname}") as f:
                     data = yaml.safe_load(f)
                 results = FirmModel(FirmProfile(**data), market, params).run()
-                assert len(results) == 10
+                assert len(results) == market.n_years
 
     def test_headcount_always_positive(self):
         from firm_model.core.firm_model import FirmModel, FirmProfile
@@ -338,14 +338,13 @@ class TestCognitiveComponents:
             "cognitive_maturation_years": 8.0,
         }
         result = MarketModel(params).run()
-        # By year 10, cognitive gain should be positive and nonzero
+        # By the final year, cognitive gain should be positive and nonzero
         cog_gain = result.breakeven[-1].g_productivity_components.get("cognitive_tasks", 0)
-        assert cog_gain > 0.001, f"Cognitive gain should be positive by year 10: {cog_gain}"
+        assert cog_gain > 0.001, f"Cognitive gain should be positive by final year: {cog_gain}"
 
     def test_cognitive_leverage_widens_senior_junior_gap(self):
         """With cognitive tools, senior employment should rise more relative to junior."""
         from market_model.core.model import MarketModel
-        n = 10
 
         # No cognitive
         p_off = base_params()
@@ -353,7 +352,7 @@ class TestCognitiveComponents:
                                "cognitive_growth_rate": 0.0, "f_cognitive": 0.35,
                                "cognitive_maturation_years": 8.0}
         r_off = MarketModel(p_off).run()
-        tiers_off = r_off.by_tier(n)
+        tiers_off = r_off.by_tier(r_off.n_years)
 
         # With cognitive
         p_on = base_params()
@@ -361,7 +360,7 @@ class TestCognitiveComponents:
                               "cognitive_growth_rate": 0.25, "f_cognitive": 0.35,
                               "cognitive_maturation_years": 6.0}
         r_on = MarketModel(p_on).run()
-        tiers_on = r_on.by_tier(n)
+        tiers_on = r_on.by_tier(r_on.n_years)
 
         senior_gap_off = tiers_off["senior"] - tiers_off["junior"]
         senior_gap_on = tiers_on["senior"] - tiers_on["junior"]
@@ -378,7 +377,7 @@ class TestCognitiveComponents:
                            "cognitive_growth_rate": 0.30, "f_cognitive": 0.35,
                            "cognitive_maturation_years": 5.0}
         result = MarketModel(p).run()
-        tiers = result.by_tier(10)
+        tiers = result.by_tier(result.n_years)
         assert tiers["senior"] > tiers["junior"], (
             f"Senior employment should exceed junior with cognitive tools: "
             f"senior={tiers['senior']:.3f} junior={tiers['junior']:.3f}"
@@ -474,12 +473,12 @@ class TestFirmBacklog:
         # Early years: backlog boost active → headcount driven by backlog demand
         # Later years: backlog depleted → headcount stabilizes or falls
         early_index = results[0].headcount_index   # year 1
-        late_index = results[9].headcount_index    # year 10
+        late_index = results[-1].headcount_index   # final year
 
         # For a manufacturing HARVEST firm, late headcount should be <= early
         # because backlog boost fades and harvest strategy reduces headcount
         assert late_index <= early_index * 1.10, \
-            f"Manufacturing HARVEST firm should not keep growing: yr1={early_index:.3f} yr10={late_index:.3f}"
+            f"Manufacturing HARVEST firm should not keep growing: yr1={early_index:.3f} final={late_index:.3f}"
 
     def test_consumer_tech_higher_parkinson_than_government(self):
         from firm_model.core.firm_backlog import INDUSTRY_PARKINSON
