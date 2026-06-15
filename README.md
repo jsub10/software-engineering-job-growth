@@ -71,6 +71,7 @@ expertise. The skill premium for senior engineers grows with cognitive tool capa
 - [docs/monte_carlo_ranges.md](docs/monte_carlo_ranges.md) — Monte Carlo parameter ranges: hard limits vs. sampling bands for every varied variable
 - [docs/monte_carlo_results.md](docs/monte_carlo_results.md) — Monte Carlo results report (1,000 iterations)
 - [docs/market_vs_firm_comparison.md](docs/market_vs_firm_comparison.md) — Market vs. firm Monte Carlo, side by side
+- [docs/combined_monte_carlo_report.md](docs/combined_monte_carlo_report.md) — Full combined market-vs-firm report (1,000 iterations, with ranges appendix)
 - [docs/variable_documentation.md](docs/variable_documentation.md) — Complete variable reference: base values, hard limits, MC ranges, empirical confidence
 - [docs/v5_cognitive_additions.md](docs/v5_cognitive_additions.md) — Why and how the cognitive components work
 - [docs/model_explanation_detailed.md](docs/model_explanation_detailed.md) — Detailed model walkthrough
