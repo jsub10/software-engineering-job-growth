@@ -29,17 +29,19 @@ SECTION 1: CONTEXT AND PRODUCTION FUNCTION
 1.1  context.simulation_years
 ─────────────────────────────────────────────────────────────────────
   path:       context.simulation_years
-  base:       10
+  base:       5
   hard_min:   1
   hard_max:   20
   mc_low:     n/a (not varied in Monte Carlo)
   mc_high:    n/a
   confidence: HIGH
-  source:     Design choice; 10 years is the standard horizon for
-              technology adoption and workforce planning models.
+  source:     Design choice; the simulation horizon. Set to 5 years for
+              near-term scenario planning; change this single value to
+              lengthen or shorten every run. All year-specific results
+              in this model assume the configured horizon.
   notes:      Longer horizons amplify cumulative margin effects but
-              increase parameter uncertainty. 10 years is the limit
-              of meaningful scenario planning for agentic coding.
+              increase parameter uncertainty. Beyond ~10 years the
+              parameter ignorance dominates any signal for agentic coding.
 
 ─────────────────────────────────────────────────────────────────────
 1.2  context.annual_cost_reduction_rate
@@ -300,7 +302,7 @@ SECTION 3: PRODUCTIVITY PARAMETERS
               to Claude 3.5 to Opus 4 etc.) but this is not a
               calibrated measure of engineering productivity improvement.
   notes:      THE SINGLE MOST IMPACTFUL UNCERTAIN PARAMETER.
-              Sensitivity: g_tools=0.10 → break-even never (within 10yr)
+              Sensitivity: g_tools=0.10 → break-even never (within the horizon)
                            g_tools=0.20 → break-even yr5 (base)
                            g_tools=0.35 → break-even yr3
               Wide mc range is appropriate given genuine ignorance.
@@ -385,8 +387,8 @@ SECTION 4: COGNITIVE PARAMETERS (V5 — ALL NO EMPIRICAL BASIS)
               harder problems for AI to assist with.
   notes:      Controls the saturation curve: cognitive_scope(t) =
               cognitive_scope_max × (1 - exp(-rate × t)).
-              At 0.15/yr: cognitive scope reaches 53% of max by year5,
-              78% of max by year10.
+              At 0.15/yr: cognitive scope reaches 53% of max by year 5
+              and keeps approaching the ceiling for longer horizons.
 
 ─────────────────────────────────────────────────────────────────────
 4.5  cognitive.cognitive_maturation_years
@@ -628,9 +630,10 @@ SECTION 5: DEMAND PARAMETERS
               categories created by agentic capabilities. Historical
               analog: internet created ~$4T software market that
               didn't exist before. But that was over 30 years; 20%
-              in 10 years for agentic tools is already speculative.
+              within the simulation horizon for agentic tools is
+              already speculative.
   notes:      mc_low = 0.00 because entirely new categories may not
-              materialize within the 10-year simulation horizon.
+              materialize within the simulation horizon.
 
 ─────────────────────────────────────────────────────────────────────
 5.12  demand.debt_productivity_drag
@@ -649,7 +652,7 @@ SECTION 5: DEMAND PARAMETERS
               debt impact on individual engineer productivity.
   notes:      Applied as: debt_drag = tech_debt_pct × drag_rate.
               Decreases as debt is paid down. Small absolute effect
-              in base case (1.2% → 0.5% over 10yr) but non-zero.
+              in base case (declines as debt is paid down over the horizon) but non-zero.
 
 ═══════════════════════════════════════════════════════════════════════
 SECTION 6: MARKET STRUCTURE
@@ -750,7 +753,7 @@ SECTION 7: FIRM MODEL VARIABLES
   notes:      In the firm model, this rate decays toward
               long_run_growth_rate over time based on
               current_market_penetration. High initial rates are
-              not sustained for the full 10-year horizon.
+              not sustained for the full simulation horizon.
 
 ─────────────────────────────────────────────────────────────────────
 7.4  current_market_penetration
@@ -859,7 +862,7 @@ SECTION 8: PARAMETERS NOT VARIED IN MONTE CARLO
 These parameters are fixed in Monte Carlo runs because they are design
 choices or have hard structural constraints:
 
-  simulation_years: 10           Design choice; not uncertain
+  simulation_years: 5            Design choice (horizon); not uncertain
   demand_ceiling: 3.0            Hard architectural bound
   backlog_floor_months: 2.0      Structural floor; not uncertain
   debt_floor_fraction: 0.15      Structural floor; not uncertain

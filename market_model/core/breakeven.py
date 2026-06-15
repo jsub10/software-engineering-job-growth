@@ -94,7 +94,7 @@ def cognitive_scope_at_year(params: ProductivityParams, year: int) -> float:
 
     At year 0: 0% (no cognitive assistance)
     At year 5: cognitive_scope_max × (1 - e^(-0.75)) ≈ 53% of max
-    At year 10: cognitive_scope_max × (1 - e^(-1.5)) ≈ 78% of max
+    (the curve keeps approaching cognitive_scope_max asymptotically for longer horizons)
     """
     return params.cognitive_scope_max * (1.0 - math.exp(-params.cognitive_growth_rate * year))
 

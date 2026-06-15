@@ -90,6 +90,7 @@ agentic-labor-model-v5/
 │   └── model_explanation_simple.md
 ├── config/
 │   ├── market_params.yaml            ← Now includes [cognitive] section
+│   ├── monte_carlo_ranges.yaml       ← Editable Monte Carlo range per variable
 │   └── scenarios.yaml                ← Now includes cognitive scenarios
 ├── market_model/
 │   ├── core/
@@ -97,6 +98,8 @@ agentic-labor-model-v5/
 │   │   ├── demand_stocks.py
 │   │   ├── demand_saturation.py
 │   │   ├── model.py                  ← Cognitive leverage in tier adjustments
+│   │   ├── monte_carlo.py            ← Monte Carlo engine (market + firm)
+│   │   ├── sensitivity.py
 │   │   ├── exogenous.py
 │   │   ├── scenario_runner.py
 │   │   └── uncertainty.py
@@ -110,6 +113,8 @@ agentic-labor-model-v5/
 │       ├── regulated_bank.yaml
 │       ├── consumer_startup.yaml
 │       └── manufacturing_it.yaml
+├── output/
+│   └── mc_report.py                  ← Timestamped MC reports (market/firm/combined)
 └── tests/
     └── test_v4.py                    ← 48 tests (v4 core + cognitive + firm backlog)
 ```
@@ -123,9 +128,16 @@ python run.py --scenarios all                     # all 16 scenarios
 python run.py --scenario cognitive_optimistic     # aggressive cognitive
 python run.py --scenario cognitive_off            # v4 behavior exactly
 python run.py --firm-compare                      # all firm profiles
-python run.py --monte-carlo --iterations 1000
+python run.py --monte-carlo --iterations 1000     # market MC + timestamped report
+python run.py --firm-monte-carlo --iterations 1000     # firm MC + report
+python run.py --combined-monte-carlo --iterations 1000 # combined market-vs-firm report
 python -m pytest tests/ -v                        # 48 tests
 ```
+
+Every Monte Carlo command writes a detailed, timestamped report to `output/reports/`
+(sampling ranges are editable in `config/monte_carlo_ranges.yaml`). The simulation
+horizon is set by `simulation_years` in `config/market_params.yaml` (currently 5);
+all year-specific results below assume that horizon.
 
 ## Empirical Confidence
 

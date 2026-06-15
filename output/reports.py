@@ -17,7 +17,7 @@ def generate_report(all_results, output_path):
         "- Aggregate demand ceiling: logistic saturation at 3× baseline",
         "- Firm model: revenue saturation, 35% absorption cap, IMPROVE branch",
         "",
-        "## Break-Even Analysis (Year 10)",
+        f"## Break-Even Analysis (Year {n}, final year)",
         "",
         "| Scenario | Demand | Prodctvy | Margin | Flip@ | Jevons | Backlog | Debt% | EmpIdx |",
         "|---|---|---|---|---|---|---|---|---|",
@@ -28,7 +28,7 @@ def generate_report(all_results, output_path):
         lines.append(f"| {nm} | {be.g_demand:.2%} | {be.g_productivity_actual:.2%} | "
                      f"{be.margin:+.2%} | >{be.productivity_to_flip:.2%} | {jevons} | "
                      f"{be.backlog_level:.1f}mo | {be.debt_level:.1f}% | {emp:.3f} |")
-    lines += ["", "> Backlog and Debt columns show stock levels at year 10.",
+    lines += ["", f"> Backlog and Debt columns show stock levels at year {n} (final year).",
               "> EmpIdx is secondary output — lower confidence than break-even margin.", ""]
     with open(output_path, "w") as f:
         f.write("\n".join(lines))

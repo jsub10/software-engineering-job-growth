@@ -26,15 +26,15 @@ We genuinely do not know. The model's base case says:
 
   Engineers peak at about 11% above baseline by year 4.
   Employment starts declining in year 5.
-  By year 10, still about 2% above baseline.
+  By year 5 (the end of the modeled horizon), still about 11% above baseline.
 
 But this single trajectory hides a very wide range of plausible outcomes.
 The two parameters that matter most — how fast AI tools improve and how much
 freed engineering capacity gets immediately filled with new work — have no
 empirical calibration. Depending on those two parameters, the break-even year
 (when employment starts declining from its peak) ranges from year 3 to "never
-within a decade." The model is honest about this range rather than hiding it
-in a single number.
+within the simulation horizon." The model is honest about this range rather
+than hiding it in a single number.
 
 ---
 
@@ -45,7 +45,7 @@ single employment index:
 
   PEAK EMPLOYMENT — how high above baseline engineers get before the decline.
   BREAK-EVEN YEAR — when employment peaks and starts declining.
-  FINAL EMPLOYMENT — where employment lands at year 10.
+  FINAL EMPLOYMENT — where employment lands in the final year of the horizon.
 
 The break-even year is the most useful of the three because it answers a
 practical question: how long does the window of rising engineering employment
@@ -53,7 +53,8 @@ last before productivity gains outpace demand growth?
 
 Under base assumptions (year 5 break-even), this window is about four years.
 If tools improve faster than assumed, it shrinks to two or three years.
-If demand is more elastic than assumed, it extends to seven or eight years.
+If demand is more elastic than assumed, employment may not decline within the
+horizon at all.
 
 ---
 
@@ -182,21 +183,21 @@ You need to know what you're looking for before AI can help you find it.
 
 The model therefore predicts that cognitive tools widen the productivity gap
 between senior and junior engineers. Under the optimistic cognitive scenario,
-senior employment is 50%+ above baseline while junior employment is 25% below
-baseline by year 10. The profession polarizes.
+senior employment is around 44% above baseline while junior employment is around
+20% below baseline by the final year. The profession polarizes.
 
 ---
 
 ### What Determines Which Way This Goes
 
 There are three things to watch that will tell you whether the break-even
-year arrives in year 3 or year 8:
+year arrives early (around year 3) or not within the horizon at all:
 
   1. HOW FAST TOOLS ACTUALLY IMPROVE
      The model runs on a 20%/yr tool improvement rate. This is the most
      impactful uncalibrated number in the entire model. At 10%/yr,
-     employment keeps rising throughout the decade. At 35%/yr, employment
-     starts falling by year 2-3. The METR randomized controlled trial
+     employment keeps rising throughout the horizon. At 35%/yr, employment
+     starts falling by year 3. The METR randomized controlled trial
      (July 2025) found tools actually *slowed* experienced developers by 19%
      on complex mature codebases in early 2025. But tools have improved since
      then, and METR is running a follow-up. That study will be the most
@@ -229,8 +230,8 @@ The model's firm-level forecasts reflect four very different trajectories
 depending on management strategy:
 
   HARVEST FIRMS (government IT, manufacturing IT, cost-center software):
-  Headcount likely falls 10-30% over the decade as productivity gains are
-  captured as cost reduction. The backlog gets cleared but not refilled.
+  Headcount likely falls 10-30% over the simulation horizon as productivity
+  gains are captured as cost reduction. The backlog gets cleared but not refilled.
   Low competitive pressure means there's no urgency to reinvest.
 
   REINVEST FIRMS (enterprise SaaS, mid-market tech):

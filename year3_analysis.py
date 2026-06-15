@@ -3,7 +3,7 @@ identical Monte Carlo draw used by `run.py --monte-carlo --iterations 1000`.
 
 Replicates run_market_monte_carlo's draw loop EXACTLY (same seed, same
 parameter iteration order) so results match the published report, but
-records the break-even entry for year 3 instead of only year 10.
+records the break-even entry for year 3 instead of only the final year.
 """
 import copy, random
 from market_model.core.scenario_runner import load_params

@@ -126,7 +126,7 @@ def print_sensitivity_table(results: Dict) -> None:
     print("How does the break-even year move as key parameters change?")
     print(f"{'='*80}")
     print("Break-even year = first year employment starts declining from peak.")
-    print("'never' = employment still rising at end of simulation (year 10).")
+    print("'never' = employment still rising at end of the simulation horizon.")
     print()
 
     for param_path, data in results.items():

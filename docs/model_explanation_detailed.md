@@ -3,7 +3,8 @@
 ## 1. Purpose and Scope
 
 This model estimates the effect of agentic coding tools on software engineer
-employment over a ten-year simulation horizon. It operates at two levels:
+employment over a configurable simulation horizon (5 years by default, set by
+`simulation_years`). It operates at two levels:
 
   MARKET LEVEL: What happens to aggregate software engineer employment as
   agentic coding reduces the unit cost of producing software?
@@ -49,16 +50,16 @@ The model leads with a trajectory shape, not a point estimate:
 
   PEAK EMPLOYMENT: max employment index above baseline during simulation
   BREAK-EVEN YEAR: first year employment starts declining from peak
-  FINAL EMPLOYMENT: employment level at year 10
+  FINAL EMPLOYMENT: employment level in the final year of the horizon
 
-Base scenario results:
+Base scenario results (at the default 5-year horizon):
   Peak: 1.112× baseline  (year 4)
   Break-even: year 5
-  Final: 1.023× baseline  (year 10)
+  Final: 1.106× baseline  (year 5)
 
 Read as: engineers peak at 11% above baseline by year 4, start declining
-in year 5 as productivity growth overtakes demand growth, end at 2.3%
-above baseline in year 10.
+in year 5 as productivity growth overtakes demand growth, and the run ends
+at 10.6% above baseline in year 5 (the end of the horizon).
 
 The break-even year is the most decision-relevant single number. It answers:
 how long does the window of rising engineer employment last?
@@ -93,7 +94,8 @@ how long does the window of rising engineer employment last?
 
   The blend shifts from the METR drag regime to routine gains over 5 years.
   This produces low productivity growth early (1-3%/yr in years 1-3)
-  rising steeply as tools mature and adoption compounds (18-20%/yr by year 10).
+  rising steeply as tools mature and adoption compounds (~9.4%/yr by year 5,
+  the end of the default horizon).
 
 #### Cognitive task gain (V5 addition)
   cognitive_scope(t) = cognitive_scope_max × (1 - exp(-cognitive_growth_rate × t))
@@ -122,14 +124,16 @@ In year 1: adoption = 17.5%, maturity = 0.20, alpha ≈ -0.11 (mostly METR drag)
   cognitive_gain ≈ 0% (tools not yet assisting cognitive work)
   net g_productivity ≈ 1.3%/yr
 
-In year 10: adoption = 72%, maturity = 1.0, alpha = +0.20 (fully routine)
-  tool_gain = 0.20 × 0.719 = 14.4%
-  routine_gain ≈ 5.4%
-  cognitive_gain ≈ 0.9%
-  net g_productivity ≈ 20%/yr
+In year 5 (the end of the default horizon): adoption ≈ 38%, maturity = 1.0,
+alpha = +0.20 (fully routine)
+  tool_gain ≈ 7.6%
+  routine_gain ≈ 2.5%
+  cognitive_gain ≈ 0.2%
+  debt_drag ≈ -0.8%
+  net g_productivity ≈ 9.4%/yr
 
-The jump from 1.3% to 20% over 10 years is driven equally by:
-  (a) adoption growing from 17% to 72%
+The jump from 1.3% to 9.4% over the 5-year horizon is driven equally by:
+  (a) adoption growing from ~18% to ~38%
   (b) alpha shifting from negative to positive as tools mature
 
 ---
@@ -211,8 +215,8 @@ output" — the same unit as g_productivity, making them directly comparable.
   LOW confidence: fitted approximately to GitHub Copilot adoption 2021-2024.
 
   Adoption is the common multiplier on both demand and productivity.
-  When adoption doubles (17%→72% over 10 years), both sides roughly double.
-  This co-movement keeps the margin small and the race close.
+  As adoption climbs (≈18%→38% over the 5-year horizon), both sides rise
+  together. This co-movement keeps the margin small and the race close.
 
 ---
 
@@ -226,15 +230,15 @@ Cross-plot: break-even year as f(g_tools, parkinson_coefficient)
 
   g_tools \ parkinson   0.15   0.25*  0.35   0.45
   g_tools=0.10         never  never  never  never
-  g_tools=0.15          yr9   never  never  never
-  g_tools=0.20*         yr4    yr5    yr8   never
+  g_tools=0.15         never  never  never  never
+  g_tools=0.20*         yr4    yr5   never  never
   g_tools=0.25          yr4    yr4    yr4    yr4
   g_tools=0.30          yr3    yr4    yr4    yr4
   g_tools=0.35          yr3    yr3    yr3    yr3
 
-  * = base parameters
+  * = base parameters   (computed at the default 5-year horizon)
 
-Full uncertainty range: break-even year spans 3 to "never within 10 years."
+Full uncertainty range: break-even year spans 3 to "never within the horizon."
 The model is appropriately agnostic. It identifies what to watch, not what
 will happen. Neither g_tools nor parkinson_coefficient has empirical basis.
 

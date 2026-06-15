@@ -73,11 +73,11 @@ def print_primary_output_table(all_results: Dict[str, MarketModelResult]) -> Non
     print("Peak EmpIdx: max employment above baseline (1.0 = no change)")
     print("PeakYr:      year employment reaches peak")
     print("BreakEven:   year employment starts declining from peak")
-    print("Final EmpIdx: employment at year 10 (may be above or below baseline)")
+    print("Final EmpIdx: employment in the final year (may be above or below baseline)")
     print(f"{'='*90}")
 
     print(f"\n{'='*90}")
-    print(f"BREAK-EVEN MARGIN TABLE: g_demand vs g_productivity (year 10)")
+    print(f"BREAK-EVEN MARGIN TABLE: g_demand vs g_productivity (final year)")
     print(f"{'='*90}")
     print(f"{'Scenario':<22} {'Demand':>9} {'Prodctvy':>9} {'Margin':>9} {'Flip@':>9} "
           f"{'Backlog':>8} {'Debt%':>7}")
@@ -88,7 +88,7 @@ def print_primary_output_table(all_results: Dict[str, MarketModelResult]) -> Non
               f"{be.margin:>+9.2%} {be.productivity_to_flip:>9.2%} "
               f"{be.backlog_level:>8.1f}mo {be.debt_level:>7.1f}%")
     print("-" * 80)
-    print("Margin > 0: employment still rising at year 10")
-    print("Margin < 0: employment falling at year 10")
+    print("Margin > 0: employment still rising in the final year")
+    print("Margin < 0: employment falling in the final year")
     print("Flip@: productivity growth rate that would flip employment direction")
     print(f"{'='*90}")

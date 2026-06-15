@@ -28,7 +28,10 @@ ALL cognitive parameters have NO EMPIRICAL BASIS. Set cognitive_scope_max=0 to r
 - `market_model/core/model.py` — Orchestrates run; applies cognitive leverage to tiers
 - `market_model/diffusion/bass.py` — Bass diffusion for tool adoption
 - `firm_model/core/firm_model.py` — Four-way fork + cognitive leverage in tier adjustments
+- `market_model/core/monte_carlo.py` — Monte Carlo engine (market + firm); loads ranges from config
 - `config/market_params.yaml` — All parameters; cognitive section at bottom
+- `config/monte_carlo_ranges.yaml` — Editable Monte Carlo sampling range per variable
+- `output/mc_report.py` — Detailed timestamped MC reports (market / firm / combined)
 - `docs/v5_cognitive_additions.md` — Why and how cognitive components work
 
 ## How to run
@@ -46,8 +49,18 @@ python run.py --combined-monte-carlo --iterations 1000  # combined market-vs-fir
 python run.py --sensitivity labor.g_tools
 python run.py --breakeven-sensitivity      # NEW: break-even year across 6 key params
 python run.py --crossplot                  # NEW: break-even grid: g_tools × parkinson
-python -m pytest tests/ -v                      # 40 tests
+python -m pytest tests/ -v                      # 48 tests
 ```
+
+## Monte Carlo reports & ranges
+- Every `--monte-carlo`, `--firm-monte-carlo`, and `--combined-monte-carlo` run writes a
+  detailed, plain-language markdown report to `output/reports/`, timestamped
+  `<kind>_monte_carlo_<YYYY-MM-DD_HHMMSS>.md`. Each report ends with an appendix
+  reproducing the parameter ranges actually used in that run. Reports are gitignored.
+- Sampling ranges are editable in `config/monte_carlo_ranges.yaml` (loaded by
+  `load_mc_ranges`); if the file is absent the built-in defaults in `monte_carlo.py` apply.
+- Verdict tables split a 100%-summing direction (>1.0× vs <1.0×) from nested severity
+  tails (which intentionally do NOT sum to 100%).
 
 ## Firm model backlog fix (this update)
 The previous firm model had a permanent static backlog boost:
@@ -108,7 +121,8 @@ cognitive_conservative: 20% scope max, slow growth (0.10/yr)
 cognitive_optimistic:   50% scope max, faster growth (0.25/yr)
 
 ## Updated base parameters (v5 revised)
-  simulation_years: 5         (horizon; results reported through year 5)
+  simulation_years: 5          (simulation horizon; results reported through the final
+                                year — change this single value to lengthen/shorten the run)
   parkinson_coefficient: 0.25  (was 0.40; lower = weaker Parkinson = sooner break-even)
   alpha_maturation_years: 5.0  (new param; controls METR drag → routine gain transition)
   Result: peak employment at year 4, break-even at year 5
@@ -118,6 +132,8 @@ With cognitive tools, the employment outcome becomes MORE EXTREME in both direct
   - If cognitive leverage drives demand expansion: substantially more engineers
   - If cognitive productivity dominates and demand doesn't expand: substantially fewer
 The model shows the break-even year arriving earlier when cognitive tools are more capable.
-Over the 5-year horizon:
+At the default horizon (simulation_years=5):
 Base scenario: peaks year 4, starts declining year 5.
 Cognitive_optimistic: peaks year 3, starts declining year 4.
+Note: horizon-dependent results (peak/break-even years) assume the current
+simulation_years; they shift if the horizon is changed.

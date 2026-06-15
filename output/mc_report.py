@@ -243,9 +243,9 @@ def write_market_mc_report(results, n_years, n_iterations, seed=42,
         L.append("")
     L.append("## 5. Bottom line")
     L.append("")
-    L.append(f"- The median decade {direction} (final {med_final:.3f}×); "
-             f"{pct_above_1:.0%} of runs end above today's baseline and "
-             f"{pct_below_07:.0%} fall below 0.7×.")
+    L.append(f"- Over the {n_years}-year horizon the median run {direction} "
+             f"(final {med_final:.3f}×); {pct_above_1:.0%} of runs end above today's "
+             f"baseline and {pct_below_07:.0%} fall below 0.7×.")
     L.append(f"- Demand-vs-productivity is { 'roughly balanced' if 45 <= pct_jevons*100 <= 55 else ('demand-led' if pct_jevons > 0.5 else 'productivity-led') } "
              f"(Jevons holds in {pct_jevons:.0%} of runs).")
     if correlations:

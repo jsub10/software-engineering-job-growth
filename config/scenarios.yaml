@@ -117,7 +117,7 @@ scenarios:
       labor: {g_tools: 0.35}
 
   slow_tools:
-    description: "g_tools=0.10: slow tool improvement. Employment may never decline in 10yr."
+    description: "g_tools=0.10: slow tool improvement. Employment may never decline within the simulation horizon."
     overrides:
       labor: {g_tools: 0.10}
 
